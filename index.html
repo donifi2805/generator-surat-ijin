@@ -15,7 +15,6 @@
         body { font-family: 'Inter', sans-serif; }
         .spinner { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        /* MODIFIKASI 2: Mengubah layout menjadi landscape (lebar) */
         #pdf-content { position: absolute; left: -9999px; font-family: 'Times New Roman', Times, serif; width: 1120px; }
         .generated-field {
             background-color: #f3f4f6;
@@ -127,13 +126,17 @@
     </div>
     
     <div id="pdf-content" class="w-[1120px] p-10 bg-white text-black">
-         <div class="header flex items-center justify-between mb-4 border-b-4 border-black pb-2"><div class="w-1/4"><img id="logo-img" src="logo.png" alt="Klinik Logo" class="h-32 w-auto mr-4"></div><div class="w-2/4 text-center text-sm"><p class="font-bold text-lg">KLINIK PRATAMA ASRINA</p><p>Jl. Kol. Sunandar No.33, Rendole Indah,</p><p>Muktiharjo, Kec. Margorejo, Kabupaten Pati, Jawa</p><p>Tengah 59163</p><p>Telp. 085192746483</p></div><div class="w-1/4"></div></div>
+         <div class="header flex items-center justify-between mb-4 border-b-4 border-black pb-2">
+            <div class="w-1/4"><img id="logo-img" src="logo.png" alt="Klinik Logo" class="h-40 w-auto mr-4"></div>
+            <div class="w-2/4 text-center text-sm"><p class="font-bold text-lg">KLINIK PRATAMA ASRINA</p><p>Jl. Kol. Sunandar No.33, Rendole Indah,</p><p>Muktiharjo, Kec. Margorejo, Kabupaten Pati, Jawa</p><p>Tengah 59163</p><p>Telp. 085192746483</p></div><div class="w-1/4"></div></div>
         <div class="text-center my-6"><h2 class="text-xl font-bold underline">SURAT KETERANGAN DOKTER</h2><p class="text-sm" id="pdf-documentNumber"></p></div>
         <p class="mb-4 text-sm">Berdasarkan hasil pemeriksaan dokter dengan informasi pasien di bawah ini:</p>
         <table class="text-sm w-full mb-4"><tbody><tr><td class="w-1/4 py-1">Nama</td><td class="w-auto">: <span id="pdf-patientName"></span></td></tr><tr><td class="py-1">Tanggal lahir</td><td>: <span id="pdf-dob"></span></td></tr><tr><td class="py-1">Nomor rekam medis</td><td>: <span id="pdf-medicalRecord"></span></td></tr><tr><td class="py-1">Nomor registrasi</td><td>: <span id="pdf-registrationNumber"></span></td></tr><tr><td class="align-top py-1">Keterangan Obat</td><td class="align-top">: <span id="pdf-medicationInfo" class="whitespace-pre-line"></span></td></tr><tr><td class="py-1">Keterangan Diagnosa</td><td>: <span id="pdf-diagnosis"></span></td></tr></tbody></table>
         <p class="text-sm mb-6">Untuk di berikan istirahat karena sakit selama <span id="pdf-restDuration"></span> hari Terhitung Mulai Dari tanggal <span id="pdf-restStartDate"></span> sampai tanggal <span id="pdf-restEndDate"></span>.</p>
         <p class="text-sm mb-8">Demikian surat keterangan ini di buat dengan sebenarnya Untuk di pergunakan sebagaimana mestinya.</p>
-        <div class="flex justify-end"><div class="text-center text-sm"><p id="pdf-locationDate">Pati, 31 Agustus 2025</p><p>Dokter Yang Memeriksa</p><img id="qr-img" src="" alt="QR Code" class="w-24 h-24 mx-auto my-2"><p class="font-bold underline" id="pdf-signerName"></p><p>SIP.DPM.PTSP/57244.29561/DU/077/059/164/III/2025</p></div></div>
+        <div class="flex justify-end"><div class="text-center text-sm"><p id="pdf-locationDate">Pati, 31 Agustus 2025</p><p>Dokter Yang Memeriksa</p>
+        <img id="qr-img" src="" alt="QR Code" class="w-32 h-32 mx-auto my-4">
+        <p class="font-bold underline" id="pdf-signerName"></p><p>SIP.DPM.PTSP/57244.29561/DU/077/059/164/III/2025</p></div></div>
         <div class="mt-12 border-t pt-2"><p class="text-xs italic">Dokumen ini telah di validasi dan di cetak otomatis oleh system serta tidak di gunakan tanda tangan identik</p></div>
     </div>
 
@@ -269,8 +272,10 @@
                     loadingStatus.textContent = 'Langkah 2: Membuat file gambar & PDF...';
                     const fullUrl = data.baseUrl + data.fileName;
                     const tempQrDiv = document.createElement('div'); tempQrDiv.style.cssText = 'position:absolute;left:-9999px;'; document.body.appendChild(tempQrDiv);
-                    new QRCode(tempQrDiv, { text: fullUrl, width: 150, height: 150, correctLevel: QRCode.CorrectLevel.H });
+                    
+                    new QRCode(tempQrDiv, { text: fullUrl, width: 200, height: 200, correctLevel: QRCode.CorrectLevel.H });
                     await new Promise(resolve => setTimeout(resolve, 500)); 
+                    
                     const qrCanvas = tempQrDiv.querySelector('canvas');
                     if (!qrCanvas) throw new Error("Gagal membuat QR code.");
                     document.body.removeChild(tempQrDiv);
@@ -291,9 +296,6 @@
                     generatedPdf = pdf;
                     generatedFileName = `Surat_Keterangan_${(data.patientName||'Pasien').replace(/\s+/g,'_')}.pdf`;
                     
-                    // MODIFIKASI 1: Menonaktifkan download PDF otomatis
-                    // pdf.save(generatedFileName);
-
                     previewContainer.innerHTML = `<img src="${generatedImageUrl}" class="max-w-full max-h-[550px] object-contain shadow-md" alt="Pratinjau Surat"/>`;
                     
                     showNotification('Sukses! File berhasil dibuat. Silakan unduh file yang Anda inginkan.', false);
