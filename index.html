@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=1200">
     <title>Generator Surat Izin & PDF Terpadu</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -127,7 +124,9 @@
     
     <div id="pdf-content" class="w-[1120px] p-10 bg-white text-black">
          <div class="header flex items-center justify-between mb-4 border-b-4 border-black pb-2">
-            <div class="w-1/4"><img id="logo-img" src="logo.png" alt="Klinik Logo" class="h-40 w-auto mr-4"></div>
+            <div class="w-1/4">
+                <img id="logo-img" src="https://profaskes.id/images/logo.webp" alt="Klinik Logo" class="h-40 w-auto mr-4" crossorigin="anonymous" onerror="this.onerror=null;this.src='https://placehold.co/200x64/eeeeee/333333?text=Logo';">
+            </div>
             <div class="w-2/4 text-center text-sm"><p class="font-bold text-lg">KLINIK PRATAMA ASRINA</p><p>Jl. Kol. Sunandar No.33, Rendole Indah,</p><p>Muktiharjo, Kec. Margorejo, Kabupaten Pati, Jawa</p><p>Tengah 59163</p><p>Telp. 085192746483</p></div><div class="w-1/4"></div></div>
         <div class="text-center my-6"><h2 class="text-xl font-bold underline">SURAT KETERANGAN DOKTER</h2><p class="text-sm" id="pdf-documentNumber"></p></div>
         <p class="mb-4 text-sm">Berdasarkan hasil pemeriksaan dokter dengan informasi pasien di bawah ini:</p>
@@ -139,6 +138,10 @@
         <p class="font-bold underline" id="pdf-signerName"></p><p>SIP.DPM.PTSP/57244.29561/DU/077/059/164/III/2025</p></div></div>
         <div class="mt-12 border-t pt-2"><p class="text-xs italic">Dokumen ini telah di validasi dan di cetak otomatis oleh system serta tidak di gunakan tanda tangan identik</p></div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <script>
         const getHtmlTemplate = (data) => {
