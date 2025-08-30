@@ -3,127 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generator & Penyimpanan Dokumen Verifikasi</title>
+    <title>Generator Surat Izin & PDF Terpadu</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Library untuk membuat QR Code -->
+    <!-- Library untuk QR Code, PDF, dan HTML-to-Canvas -->
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        #qrcode-container img,
-        #qrcode-container canvas {
-            margin: auto;
-            border-radius: 8px;
-            border: 4px solid white;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-        }
-        .spinner {
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
+        body { font-family: 'Inter', sans-serif; }
+        .spinner { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        /* Style untuk memastikan konten PDF tidak terlihat di layar */
+        #pdf-content { position: absolute; left: -9999px; font-family: 'Times New Roman', Times, serif; }
     </style>
 </head>
 <body class="bg-gray-100">
 
-    <div class="container mx-auto p-4 sm:p-6 md:p-8">
+    <div class="container mx-auto p-4 sm:p-6 md:p-8 max-w-4xl">
         <header class="text-center mb-8">
             <img src="https://profaskes.id/images/logo.webp" alt="Logo Profaskes" class="h-12 mx-auto mb-4" onerror="this.onerror=null;this.src='https://placehold.co/200x50/eeeeee/333333?text=Logo';">
-            <h1 class="text-3xl font-bold text-gray-800">Generator & Penyimpanan Dokumen Verifikasi</h1>
-            <p class="text-gray-600 mt-2">Buat halaman verifikasi dan simpan langsung ke GitHub.</p>
+            <h1 class="text-3xl font-bold text-gray-800">Generator Surat Terpadu</h1>
+            <p class="text-gray-600 mt-2">Buat Halaman Verifikasi, QR Code, dan Surat PDF dalam Satu Langkah.</p>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <!-- Kolom Formulir Input -->
-            <div class="bg-white p-6 rounded-xl shadow-lg">
-                <h2 class="text-xl font-bold text-gray-700 mb-6 border-b pb-3">Data Dokumen</h2>
-                <form id="document-form" class="space-y-4">
-                    <!-- Base URL disembunyikan dan diatur ke URL Vercel sesuai permintaan -->
-                    <div class="hidden">
-                        <label for="baseUrl">Base URL Publik</label>
-                        <input type="text" id="baseUrl" name="baseUrl" value="https://generator-surat-ijin.vercel.app/">
+        <div class="bg-white p-6 rounded-xl shadow-lg">
+            <form id="combined-form" class="space-y-6">
+                <!-- Bagian Data Dokumen Verifikasi & Surat -->
+                <fieldset class="border-t border-gray-200 pt-6">
+                    <legend class="text-xl font-bold text-gray-700 mb-4">Data Utama Surat</legend>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="letterNumber" class="block text-sm font-medium text-gray-700 mb-1">No. Surat</label>
+                            <input type="text" id="letterNumber" name="letterNumber" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" placeholder="Contoh: 123/SKD/08/2025" required value="19677/SKD/08/2025">
+                        </div>
+                        <div>
+                            <label for="letterDate" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Surat</label>
+                            <input type="date" id="letterDate" name="letterDate" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" required>
+                        </div>
+                        <div>
+                            <label for="creationTimestamp" class="block text-sm font-medium text-gray-700 mb-1">Dibuat Pada (Tanggal & Waktu)</label>
+                            <input type="datetime-local" id="creationTimestamp" name="creationTimestamp" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" required>
+                        </div>
+                        <div>
+                            <label for="signerName" class="block text-sm font-medium text-gray-700 mb-1">Nama Dokter Penanda Tangan</label>
+                            <select id="signerName" name="signerName" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" required>
+                                <option>Dr. Yulina Saputri</option>
+                                <option>Dr. Ahmad Dahlan</option>
+                                <option>Dr. Siti Fatimah</option>
+                                <option value="other">Lainnya...</option>
+                            </select>
+                            <input type="text" id="otherSignerName" name="otherSignerName" class="hidden w-full px-3 py-2 mt-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" placeholder="Masukkan nama penanda tangan">
+                        </div>
                     </div>
-                    <!-- Nama File disembunyikan dan dibuat otomatis -->
-                    <div class="hidden">
-                        <label for="fileName">Nama File HTML</label>
-                        <input type="text" id="fileName" name="fileName">
-                    </div>
-                    <!-- ID Dokumen disembunyikan dan dibuat otomatis -->
-                    <div class="hidden">
-                        <label for="documentId">ID Dokumen</label>
-                        <input type="text" id="documentId" name="documentId">
-                    </div>
+                </fieldset>
 
-                     <div>
-                        <label for="letterNumber" class="block text-sm font-medium text-gray-700 mb-1">No. Surat</label>
-                        <input type="text" id="letterNumber" name="letterNumber" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" placeholder="3122/SKD/08/2025" required>
+                <!-- Bagian Data Pasien untuk PDF -->
+                <fieldset class="border-t border-gray-200 pt-6">
+                    <legend class="text-xl font-bold text-gray-700 mb-4">Data Pasien</legend>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="patientName" class="block text-sm font-medium text-gray-700">Nama Pasien</label>
+                            <input type="text" id="patientName" value="Yelli Putri Yanti" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label for="dob" class="block text-sm font-medium text-gray-700">Tanggal Lahir</label>
+                            <input type="text" id="dob" value="15 September 2005" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label for="medicalRecord" class="block text-sm font-medium text-gray-700">Nomor Rekam Medis</label>
+                            <input type="text" id="medicalRecord" value="G9365-005153" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label for="registrationNumber" class="block text-sm font-medium text-gray-700">Nomor Registrasi</label>
+                            <input type="text" id="registrationNumber" value="770864111858" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="diagnosis" class="block text-sm font-medium text-gray-700">Keterangan Diagnosa</label>
+                            <input type="text" id="diagnosis" value="Benign paroxysmal positional vertigo (BPPV)" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="medicationInfo" class="block text-sm font-medium text-gray-700">Keterangan (Obat)</label>
+                            <textarea id="medicationInfo" rows="3" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">Meclizine 6 tablet, 2x1 Tablet sesudah makan (25mg)&#10;Flunarizine 6 tablet, 1x1 Tablet sesudah makan malam (5mg)&#10;Domperidone 9 tablet, 3x1 Tablet sebelum makan (10mg)</textarea>
+                        </div>
+                         <div>
+                            <label for="restStartDate" class="block text-sm font-medium text-gray-700">Mulai Istirahat</label>
+                            <input type="text" id="restStartDate" value="29-08-2025" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label for="restEndDate" class="block text-sm font-medium text-gray-700">Selesai Istirahat</label>
+                            <input type="text" id="restEndDate" value="29-08-2025" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                         <div>
+                            <label for="restDuration" class="block text-sm font-medium text-gray-700">Lama Istirahat (hari)</label>
+                            <input type="number" id="restDuration" value="1" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
                     </div>
-                    <div>
-                        <label for="letterDate" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Surat</label>
-                        <input type="date" id="letterDate" name="letterDate" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" required>
-                    </div>
-                    <div>
-                        <label for="creationTimestamp" class="block text-sm font-medium text-gray-700 mb-1">Dibuat Pada (Tanggal & Waktu)</label>
-                        <input type="datetime-local" id="creationTimestamp" name="creationTimestamp" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" required>
-                    </div>
-                    <div>
-                        <label for="signerName" class="block text-sm font-medium text-gray-700 mb-1">Nama Penanda Tangan</label>
-                        <select id="signerName" name="signerName" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" required>
-                            <option>Dr. Yulina Saputri</option>
-                            <option>Dr. Ahmad Dahlan</option>
-                            <option>Dr. Siti Fatimah</option>
-                            <option value="other">Lainnya...</option>
-                        </select>
-                        <input type="text" id="otherSignerName" name="otherSignerName" class="hidden w-full px-3 py-2 mt-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" placeholder="Masukkan nama penanda tangan">
-                    </div>
-                    
-                    <button type="submit" id="submitBtn" class="w-full bg-teal-600 text-white font-bold py-3 px-4 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-colors duration-300 flex items-center justify-center space-x-2 disabled:bg-teal-400 disabled:cursor-not-allowed">
-                        <svg id="submit-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z" /><path d="M9 13l-3-3m0 0l3-3m-3 3h12" /></svg>
+                </fieldset>
+
+                <!-- Tombol Submit Utama -->
+                <div class="pt-5">
+                    <button type="submit" id="submitBtn" class="w-full flex justify-center items-center space-x-2 bg-indigo-600 text-white font-bold py-3 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300 disabled:bg-indigo-400 disabled:cursor-not-allowed">
+                        <svg id="submit-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
                         <svg id="loading-spinner" class="h-5 w-5 spinner hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                        <span id="submit-text">Simpan ke GitHub & Buat QR Code</span>
+                        <span id="submit-text">Buat Verifikasi & Generate PDF</span>
                     </button>
-                </form>
-            </div>
+                </div>
+            </form>
+        </div>
 
-            <!-- Kolom Hasil Output -->
-            <div id="output-container" class="relative bg-white p-6 rounded-xl shadow-lg flex-col items-center justify-center text-center hidden">
-                 <!-- Notifikasi Sukses/Error -->
-                <div id="notification" class="absolute top-0 left-0 right-0 p-4 text-white text-center rounded-t-xl hidden"></div>
-                
-                <h2 class="text-xl font-bold text-gray-700 mb-4 mt-8">Hasil Generator</h2>
-                <div id="qrcode-container" class="mb-4 p-2 bg-gray-100 rounded-xl">
-                    <!-- QR Code akan muncul di sini -->
-                </div>
-                 <div class="w-full px-4">
-                    <div class="relative">
-                        <input id="qr-link" class="text-sm text-gray-600 font-mono w-full bg-gray-50 border border-gray-200 rounded-md py-2 px-3 pr-10 break-all" readonly>
-                        <button id="copyBtn" class="absolute inset-y-0 right-0 flex items-center pr-3" title="Salin URL">
-                            <svg class="h-5 w-5 text-gray-500 hover:text-gray-700" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM5 11a1 1 0 100 2h4a1 1 0 100-2H5z" /><path fill-rule="evenodd" d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm2-1a1 1 0 00-1 1v10a1 1 0 001 1h12a1 1 0 001-1V5a1 1 0 00-1-1H4z" clip-rule="evenodd" /></svg>
-                        </button>
-                    </div>
-                </div>
-                <p id="info-text" class="text-gray-500 my-4"></p>
-                <button id="downloadQrBtn" class="bg-gray-700 text-white font-bold py-2 px-5 rounded-md hover:bg-gray-800 transition-colors duration-300 flex items-center space-x-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
-                    <span>Unduh QR Code (.png)</span>
-                </button>
+        <!-- Kolom Hasil Output -->
+        <div id="output-container" class="mt-8 bg-white p-6 rounded-xl shadow-lg flex-col items-center justify-center text-center hidden">
+            <div id="notification" class="w-full p-4 text-white text-center rounded-lg mb-4 hidden"></div>
+            <h2 class="text-xl font-bold text-gray-700 mb-4">Proses Selesai!</h2>
+            <p id="info-text" class="text-gray-600 mb-4"></p>
+            <div id="qrcode-container" class="mb-4 p-2 bg-gray-100 rounded-xl inline-block border">
+                <!-- QR Code akan muncul di sini -->
             </div>
-             <div id="initial-output" class="bg-white p-6 rounded-xl shadow-lg flex flex-col items-center justify-center text-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6.364 1.636l-.707.707M20 12h-1M17.636 17.636l-.707-.707M12 20v-1m-6.364-1.636l.707-.707M4 12h1m2.364-5.636l.707.707" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 18a6 6 0 100-12 6 6 0 000 12z" /></svg>
-                <h2 class="text-xl font-bold text-gray-400">Output Akan Muncul di Sini</h2>
-                <p class="text-gray-500 mt-2">Isi formulir di sebelah kiri dan klik tombol untuk memulai.</p>
+            <p class="text-gray-500 mt-2">PDF Surat Keterangan Dokter telah diunduh secara otomatis.</p>
+        </div>
+    </div>
+    
+    <!-- Konten Tersembunyi untuk Generasi PDF -->
+    <div id="pdf-content" class="w-[800px] p-10 bg-white text-black">
+        <div class="header flex items-center justify-between mb-4 border-b-4 border-black pb-2">
+            <div class="w-1/4"><img id="logo-img" src="logo.png" alt="Klinik Logo" class="h-32 w-auto mr-4"></div>
+            <div class="w-2/4 text-center text-sm">
+                <p class="font-bold text-lg">KLINIK PRATAMA ASRINA</p>
+                <p>Jl. Kol. Sunandar No.33, Rendole Indah,</p>
+                <p>Muktiharjo, Kec. Margorejo, Kabupaten Pati, Jawa</p>
+                <p>Tengah 59163</p>
+                <p>Telp. 085192746483</p>
             </div>
+            <div class="w-1/4"></div>
+        </div>
+        <div class="text-center my-6">
+            <h2 class="text-xl font-bold underline">SURAT KETERANGAN DOKTER</h2>
+            <p class="text-sm" id="pdf-documentNumber"></p>
+        </div>
+        <p class="mb-4 text-sm">Berdasarkan hasil pemeriksaan dokter dengan informasi pasien di bawah ini:</p>
+        <table class="text-sm w-full mb-4">
+            <tbody>
+                <tr><td class="w-1/4 py-1">Nama</td><td class="w-auto">: <span id="pdf-patientName"></span></td></tr>
+                <tr><td class="py-1">Tanggal lahir</td><td>: <span id="pdf-dob"></span></td></tr>
+                <tr><td class="py-1">Nomor rekam medis</td><td>: <span id="pdf-medicalRecord"></span></td></tr>
+                <tr><td class="py-1">Nomor registrasi</td><td>: <span id="pdf-registrationNumber"></span></td></tr>
+                <tr><td class="align-top py-1">Keterangan</td><td class="align-top">: <span id="pdf-medicationInfo" class="whitespace-pre-line"></span></td></tr>
+                <tr><td class="py-1">Keterangan diagnosa</td><td>: <span id="pdf-diagnosis"></span></td></tr>
+            </tbody>
+        </table>
+        <p class="text-sm mb-6">Untuk di berikan istirahat karena sakit selama <span id="pdf-restDuration"></span> hari Terhitung Mulai Dari tanggal <span id="pdf-restStartDate"></span> sampai tanggal <span id="pdf-restEndDate"></span>.</p>
+        <p class="text-sm mb-8">Demikian surat keterangan ini di buat dengan sebenarnya Untuk di pergunakan sebagaimana mestinya.</p>
+        <div class="flex justify-end">
+            <div class="text-center text-sm">
+                <p>Pati, 28-08-2025</p>
+                <p>Dokter Yang Memeriksa</p>
+                <img id="qr-img" src="" alt="QR Code" class="w-24 h-24 mx-auto my-2">
+                <p class="font-bold underline" id="pdf-signerName"></p>
+                <p>SIP.DPM.PTSP/57244.29561/DU/077/059/164/III/2025</p>
+            </div>
+        </div>
+        <div class="mt-12 border-t pt-2">
+            <p class="text-xs italic">Dokumen ini telah di validasi dan di cetak otomatis oleh system serta tidak di gunakan tanda tangan identik</p>
         </div>
     </div>
 
+
     <script>
-        // --- TEMPLATE HTML UNTUK HALAMAN HASIL ---
+        // --- TEMPLATE HTML UNTUK HALAMAN VERIFIKASI (YANG DISIMPAN DI GITHUB) ---
         const getHtmlTemplate = (data) => {
             const head = `
 <!DOCTYPE html>
@@ -132,334 +183,189 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detail Dokumen Elektronik</title>
-    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAA/1BMVEX////4/v/T6fdntOUAktwAjd4AjeI6oOSQw+7R5vjr9vxQqeEAhdsAlOV6wfCr2Pe03Pmo0vaAuu0AgNwAetYyktrc6/m52/QAmurz+f6pzO4AdNcAi+Z4wvgAc9uz0/KIyfdyreaW0M1Yvbi+3tj/9/PZ5N+YzMRzxcOLztIyjttDoN/P6ekApaP5/Px3xtEAZ8pfn+EAfdTI5ejk8Oml3N2RvOwAadXG5doArXwrspXw9v2v3eoGrpVDgt9Yleiq1e13wOEAo5Jrs9eFud9Km85smOMAgcgAcMRTlNxbmdUAW85+r+qtxO/I1vGetuV9oeAAYMoAT8hlitgATdLMfTOeAAABUklEQVR4AYzPg5oDMQBF4bO2d1OubdQ2U7fv/yybZGr/M+H9Ipa3wgyra+sbG5ubW9s7jNvd2z84PDo+Od06O78QjLBt2o+xOJwbLhtDDt2XDDm9uqbvyH3DiNurHbpWrXV39w+PT88vrw7gzaVr7X0T+Pi8/4Cvr93Xb0D8/GKIvxPA8wV4deVD8QcEmnN/RYdAMBT2wgNKJOBHe39HiXq+VBaLdVcST6Dtn6IkU2pl+lMty+yiJOJof9so2TX0fYBcFiV/ZYV+lNstugpDYXfb0/MIhijahra9KKGIn1uMchHNlUfzu8wap6xEYOf35xpFyCrazpUfrRYIuFyB7vvqMoJRcmE4Glcup8BoNrBEmr9YGgEseWuhVpMJZ9UskYkvk7Vq9P0G4ldSp7WWzNfzslVnwCGrkVYVRbSbMpDfYVgj0JBVZnDIToDZBP8jEQAAns0rz6moqnUAAAAASUVORKCYII=">
-    <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAA/1BMVEX////4/v/T6fdntOUAktwAjd4AjeI6oOSQw+7R5vjr9vxQqeEAhdsAlOV6wfCr2Pe03Pmo0vaAuu0AgNwAetYyktrc6/m52/QAmurz+f6pzO4AdNcAi+Z4wvgAc9uz0/KIyfdyreaW0M1Yvbi+3tj/9/PZ5N+YzMRzxcOLztIyjttDoN/P6ekApaP5/Px3xtEAZ8pfn+EAfdTI5ejk8Oml3N2RvOwAadXG5doArXwrspXw9v2v3eoGrpVDgt9Yleiq1e13wOEAo5Jrs9eFud9Km85smOMAgcgAcMRTlNxbmdUAW85+r+qtxO/I1vGetuV9oeAAYMoAT8hlitgATdLMfTOeAAABUklEQVR4AYzPg5oDMQBF4bO2d1OubdQ2U7fv/yybZGr/M+H9Ipa3wgyra+sbG5ubW9s7jNvd2z84PDo+Od06O78QjLBt2o+xOJwbLhtDDt2XDDm9uqbvyH3DiNurHbpWrXV39w+PT88vrw7gzaVr7X0T+Pi8/4Cvr93Xb0D8/GKIvxPA8wV4deVD8QcEmnN/RYdAMBT2wgNKJOBHe39HiXq+VBaLdVcST6Dtn6IkU2pl+lMty+yiJOJof9so2TX0fYBcFiV/ZYV+lNstugpDYXfb0/MIhijahra9KKGIn1uMchHNlUfzu8wap6xEYOf35xpFyCrazpUfrRYIuFyB7vvqMoJRcmE4Glcup8BoNrBEmr9YGgEseWuhVpMJZ9UskYkvk7Vq9P0G4ldSp7WWzNfzslVnwCGrkVYVRbSbMpDfYVgj0JBVZnDIToDZBP8jEQAAns0rz6moqnUAAAAASUVORKCYII=">
-    <meta name="application-name" content="Profaskes">
-    <meta name="apple-mobile-web-app-title" content="Profaskes">
     <script src="https://cdn.tailwindcss.com"><\/script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; min-height: 100vh; }
-        .fade-in { animation: fadeIn 0.5s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        .fade-out { animation: fadeOut 0.5s ease-in-out forwards; }
-        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
-    </style>
+    <style> body { font-family: 'Inter', sans-serif; } </style>
 </head>
 `;
             const body = `
-<body class="bg-gray-100 flex items-center justify-center">
-    <div id="loading-screen" class="fixed inset-0 bg-gray-100 flex flex-col justify-center items-center z-50 p-4">
-        <img src="https://profaskes.id/images/logo.webp" alt="Logo Profaskes" class="h-16 mb-8" onerror="this.onerror=null;this.src='https://placehold.co/200x64/eeeeee/333333?text=Logo';">
-        <div class="w-full max-w-md bg-white p-6 rounded-lg shadow-md">
-            <h2 class="text-lg font-bold text-center text-gray-700 mb-4">Memverifikasi Dokumen...</h2>
-            <ul class="space-y-3">
-                <li id="step1" class="flex items-center text-gray-500 transition-all duration-300"><div class="w-6 h-6 mr-3 flex items-center justify-center"><svg class="spinner animate-spin h-5 w-5 text-teal-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><svg class="checkmark hidden h-6 w-6 text-teal-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg></div><span>Meng-scan data ProFaskes</span></li>
-                <li id="step2" class="flex items-center text-gray-500 transition-all duration-300 opacity-50"><div class="w-6 h-6 mr-3 flex items-center justify-center"><svg class="spinner hidden animate-spin h-5 w-5 text-teal-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><svg class="checkmark hidden h-6 w-6 text-teal-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg></div><span>Validasi SIP Tenaga medis KKi</span></li>
-                <li id="step3" class="flex items-center text-gray-500 transition-all duration-300 opacity-50"><div class="w-6 h-6 mr-3 flex items-center justify-center"><svg class="spinner hidden animate-spin h-5 w-5 text-teal-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><svg class="checkmark hidden h-6 w-6 text-teal-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg></div><span>Mengecek data klinik pratama asrina</span></li>
-            </ul>
-        </div>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="w-full max-w-2xl bg-white rounded-xl shadow-lg overflow-hidden">
+        <header class="bg-teal-600 text-white p-6"><div class="flex items-center space-x-4"><svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg><div><h1 class="text-2xl font-bold">Dokumen Terverifikasi</h1><p class="text-sm text-teal-100">Detail Tanda Tangan Elektronik</p></div></div></header>
+        <main class="p-8 space-y-5">
+            <div><p class="text-sm text-gray-500">ID Dokumen</p><p class="font-mono text-gray-800 break-all">${data.documentId}</p></div><hr>
+            <div><p class="text-sm text-gray-500">No. Surat</p><p class="text-gray-800 font-semibold">${data.letterNumber}</p></div><hr>
+            <div><p class="text-sm text-gray-500">Tanggal Surat</p><p class="text-gray-800">${data.letterDate}</p></div><hr>
+            <div><p class="text-sm text-gray-500">Nama Penanda Tangan</p><p class="text-gray-800 font-semibold">${data.signerName}</p></div><hr>
+            <div><p class="text-sm text-gray-500">Dibuat Pada</p><p class="text-gray-800">${data.creationTimestamp}</p></div>
+        </main>
+        <footer class="p-4 bg-gray-100 text-center"><p class="text-xs text-gray-500">&copy; ${new Date().getFullYear()} Sistem Verifikasi Dokumen.</p></footer>
     </div>
-    <div id="main-content" class="hidden w-full p-4 sm:p-6 lg:p-8 flex flex-col items-center">
-        <div class="mb-6"><img src="https://profaskes.id/images/logo.webp" alt="Logo Profaskes" class="h-12 mx-auto" onerror="this.onerror=null;this.src='https://placehold.co/200x50/eeeeee/333333?text=Logo';"></div>
-        <div class="w-full max-w-2xl bg-white rounded-xl shadow-lg overflow-hidden">
-            <div id="document-details" class="fade-in">
-                <header class="bg-teal-600 text-white p-4 md:p-6"><div class="flex justify-between items-center"><div class="flex items-center space-x-4"><div><svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg></div><div><h1 class="text-xl md:text-2xl font-bold">Dokumen Terverifikasi</h1><p class="text-sm text-teal-100">Detail Tanda Tangan Elektronik</p></div></div><div><img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhWaiNWrP8YQAZeLoHz4ih_1uY49hKf6fkPiIvO53uVD8Oj4HG99FXMAVXJ8hgug8tfLx7V5JGIopZ6DI_8XCtQNitZT5EipOcXXfMQoSssjefjAb8v3GqZTQeRx-Bq5wQn87N3v5gMPoGIhJJC8ndE8IlqntPfIcw8dlXeBTZYHgKk61poIJAJF3K6ZTc/s1600/unnamed__1_-removebg-preview.png" alt="Logo Verifikasi" class="h-24 w-24 md:h-32 md:w-32" onerror="this.onerror=null;this.src='https://placehold.co/128x128/eeeeee/333333?text=Logo';"></div></div></header>
-                <main class="p-6 md:p-8">
-                    <div class="space-y-5">
-                        <div class="flex flex-col sm:flex-row sm:items-center"><p class="w-full sm:w-1/3 text-gray-500 font-medium mb-1 sm:mb-0">Jenis Dokumen</p><p class="w-full sm:w-2/3 text-gray-800 font-semibold">Surat Keterangan Dokter</p></div><hr>
-                        <div class="flex flex-col sm:flex-row sm:items-center"><p class="w-full sm:w-1/3 text-gray-500 font-medium mb-1 sm:mb-0">ID Dokumen</p><p class="w-full sm:w-2/3 text-gray-800 font-mono text-sm break-all">${data.documentId}</p></div><hr>
-                        <div class="flex flex-col sm:flex-row sm:items-center"><p class="w-full sm:w-1/3 text-gray-500 font-medium mb-2 sm:mb-0">No. Surat</p><div class="w-full sm:w-2/3 flex justify-between items-center"><p class="text-gray-800">${data.letterNumber}</p></div></div><hr>
-                        <div class="flex flex-col sm:flex-row sm:items-center"><p class="w-full sm:w-1/3 text-gray-500 font-medium mb-1 sm:mb-0">Tanggal Surat</p><p class="w-full sm:w-2/3 text-gray-800">${data.letterDate}</p></div><hr>
-                        <div class="flex flex-col sm:flex-row sm:items-start"><p class="w-full sm:w-1/3 text-gray-500 font-medium mb-1 sm:mb-0">Dibuat Di</p><div class="w-full sm:w-2/3 text-gray-800"><p class="font-semibold">KLINIK PRATAMA ASRINA</p><p class="text-sm text-gray-600">Jl. Kol. Sunandar No.33, Rendole Indah, Muktiharjo, Kec. Margorejo, Kabupaten Pati, Jawa Tengah 59163</p></div></div><hr>
-                        <div class="flex flex-col sm:flex-row sm:items-center"><p class="w-full sm:w-1/3 text-gray-500 font-medium mb-1 sm:mb-0">Dibuat Pada</p><p class="w-full sm:w-2/3 text-gray-800">${data.creationTimestamp}</p></div>
-                    </div>
-                </main>
-                <div class="bg-gray-50 p-6 md:p-8 border-t border-gray-200">
-                       <h2 class="text-lg font-bold text-teal-700 mb-4">Informasi Penanda Tangan</h2>
-                       <div class="space-y-4">
-                           <div class="flex flex-col sm:flex-row sm:items-center"><p class="w-full sm:w-1/3 text-gray-500 font-medium mb-1 sm:mb-0">Nama</p><p class="w-full sm:w-2/3 text-gray-800 font-semibold">${data.signerName}</p></div><hr>
-                           <div class="flex flex-col sm:flex-row sm:items-start"><p class="w-full sm:w-1/3 text-gray-500 font-medium mb-1 sm:mb-0">No. Identitas (SIP)</p><p class="w-full sm:w-2/3 text-gray-800 break-all">SIP.DPMPTSP/957244.29561/DU/077/059/164/III/2025</p></div>
-                       </div>
-                </div>
-                <footer class="p-4 bg-gray-100"><div class="flex flex-col sm:flex-row justify-between items-center text-center sm:text-left"><p class="text-xs text-gray-500 mb-2 sm:mb-0">&copy; 2025 Sistem Verifikasi Dokumen.</p><div class="flex items-center space-x-2"><p class="text-xs text-gray-600 font-medium">Terferifikasi Konsil Kesehatan indonesia kki.go.id</p><img src="https://kki.go.id/assets/img/Logo-kki-Full.png" alt="Logo KKI" class="h-8" onerror="this.onerror=null;this.src='https://placehold.co/100x32/eeeeee/333333?text=KKI';"></div></div></footer>
-            </div>
-        </div>
-    </div>
-    <script>
-        window.addEventListener('load', () => {
-            const loadingScreen = document.getElementById('loading-screen');
-            const mainContent = document.getElementById('main-content');
-            const steps = ['step1', 'step2', 'step3'];
-            function runStep(index) {
-                if (index >= steps.length) {
-                    loadingScreen.classList.add('fade-out');
-                    setTimeout(() => {
-                        loadingScreen.style.display = 'none';
-                        mainContent.classList.remove('hidden');
-                        mainContent.classList.add('fade-in');
-                    }, 500);
-                    return;
-                }
-                const stepElement = document.getElementById(steps[index]);
-                const spinner = stepElement.querySelector('.spinner');
-                const checkmark = stepElement.querySelector('.checkmark');
-                stepElement.classList.remove('opacity-50');
-                if (spinner) spinner.classList.remove('hidden');
-                const randomDelay = Math.random() * 1000 + 1500;
-                setTimeout(() => {
-                    if (spinner) spinner.classList.add('hidden');
-                    if (checkmark) checkmark.classList.remove('hidden');
-                    stepElement.classList.remove('text-gray-500');
-                    stepElement.classList.add('text-teal-600', 'font-semibold');
-                    runStep(index + 1);
-                }, randomDelay);
-            }
-            runStep(0);
-        });
-    <\/script>
 </body>
-</html>
-`;
+</html>`;
             return head + body;
         }
 
-
-        // --- LOGIKA UTAMA APLIKASI GENERATOR ---
         document.addEventListener('DOMContentLoaded', () => {
-            const form = document.getElementById('document-form');
-            const outputContainer = document.getElementById('output-container');
-            const initialOutput = document.getElementById('initial-output');
-            const qrcodeContainer = document.getElementById('qrcode-container');
-            const qrLinkInput = document.getElementById('qr-link');
-            const infoText = document.getElementById('info-text');
-            const copyBtn = document.getElementById('copyBtn');
-            const downloadQrBtn = document.getElementById('downloadQrBtn');
-            const documentIdInput = document.getElementById('documentId');
-            const letterDateInput = document.getElementById('letterDate');
-            const creationTimestampInput = document.getElementById('creationTimestamp');
-            const signerNameSelect = document.getElementById('signerName');
-            const otherSignerNameInput = document.getElementById('otherSignerName');
+            const form = document.getElementById('combined-form');
             const submitBtn = document.getElementById('submitBtn');
             const submitIcon = document.getElementById('submit-icon');
             const loadingSpinner = document.getElementById('loading-spinner');
             const submitText = document.getElementById('submit-text');
+            const outputContainer = document.getElementById('output-container');
+            const qrcodeContainer = document.getElementById('qrcode-container');
             const notification = document.getElementById('notification');
-            const baseUrlInput = document.getElementById('baseUrl');
+            const infoText = document.getElementById('info-text');
 
-            // --- FUNGSI UNTUK MENAMPILKAN NOTIFIKASI ---
+            // --- Fungsi untuk menampilkan notifikasi ---
             const showNotification = (message, isError = false) => {
                 notification.textContent = message;
-                notification.className = `absolute top-0 left-0 right-0 p-4 text-white text-center rounded-t-xl ${isError ? 'bg-red-500' : 'bg-green-500'}`;
+                notification.className = `w-full p-4 text-white text-center rounded-lg mb-4 ${isError ? 'bg-red-500' : 'bg-green-500'}`;
                 notification.classList.remove('hidden');
             };
-            
-            // --- FUNGSI GENERATE RANDOM ---
-            const generateRandomString = (length, characters) => {
-                let result = '';
-                const charactersLength = characters.length;
-                for (let i = 0; i < length; i++) {
-                    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-                }
-                return result;
-            };
 
-            // --- FUNGSI GENERATE ID DOKUMEN BARU ---
-            const generateNewDocumentId = () => {
-                const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-                const alphanumeric = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-                const part1 = generateRandomString(5, letters);
-                const part2 = generateRandomString(3, alphanumeric);
-                const part3 = generateRandomString(11, alphanumeric);
-                return `${part1}-${part2}-${part3}`;
-            };
-            
-            // --- FUNGSI GENERATE NAMA FILE BARU ---
-            const generateNewFileName = () => {
-                const now = new Date();
-                const day = String(now.getDate()).padStart(2, '0');
-                const month = String(now.getMonth() + 1).padStart(2, '0');
-                const randomPart = generateRandomString(13, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789');
-                return `${day}-${month}-${randomPart}.html`;
-            };
+            // --- Fungsi utilitas ---
+            const generateRandomString = (length, chars) => Array.from({ length }, () => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
+            const generateNewDocumentId = () => `${generateRandomString(5, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')}-${generateRandomString(3, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')}-${generateRandomString(11, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')}`;
+            const generateNewFileName = () => `${String(new Date().getDate()).padStart(2, '0')}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${generateRandomString(13, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')}.html`;
+            const formatDate = (dateStr) => { if (!dateStr) return ''; const [y, m, d] = dateStr.split('-'); return `${d}-${m}-${y}`; }
+            const formatDateTime = (dateTimeStr) => { if (!dateTimeStr) return ''; const d = new Date(dateTimeStr); return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`; }
 
-            // --- FUNGSI UNTUK MENGATUR WAKTU SAAT INI ---
+            // --- Atur tanggal dan waktu default ---
             const setCurrentDateTime = () => {
                 const now = new Date();
+                document.getElementById('letterDate').value = now.toISOString().split('T')[0];
                 now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-                creationTimestampInput.value = now.toISOString().slice(0, 16);
-                
-                const today = new Date().toISOString().split('T')[0];
-                letterDateInput.value = today;
+                document.getElementById('creationTimestamp').value = now.toISOString().slice(0, 16);
             };
+            setCurrentDateTime();
 
-            // --- EVENT LISTENERS ---
-
-            // Tampilkan input lain jika 'Lainnya...' dipilih
+            // --- Tampilkan/Sembunyikan input nama dokter 'Lainnya' ---
+            const signerNameSelect = document.getElementById('signerName');
+            const otherSignerNameInput = document.getElementById('otherSignerName');
             signerNameSelect.addEventListener('change', () => {
-                if (signerNameSelect.value === 'other') {
-                    otherSignerNameInput.classList.remove('hidden');
-                    otherSignerNameInput.required = true;
-                } else {
-                    otherSignerNameInput.classList.add('hidden');
-                    otherSignerNameInput.required = false;
-                }
+                const isOther = signerNameSelect.value === 'other';
+                otherSignerNameInput.classList.toggle('hidden', !isOther);
+                otherSignerNameInput.required = isOther;
             });
 
-            // Tombol Salin URL
-            copyBtn.addEventListener('click', () => {
-                qrLinkInput.select();
-                document.execCommand('copy');
-                // Beri feedback visual singkat
-                const originalText = copyBtn.title;
-                copyBtn.title = 'Disalin!';
-                setTimeout(() => { copyBtn.title = originalText; }, 2000);
-            });
-
-            // --- PENGIRIMAN FORMULIR ---
+            // --- LOGIKA UTAMA SAAT SUBMIT FORM ---
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
-
-                // 1. Tampilkan status loading
+                
+                // 1. TAMPILKAN STATUS LOADING
                 submitBtn.disabled = true;
                 submitIcon.classList.add('hidden');
                 loadingSpinner.classList.remove('hidden');
-                submitText.textContent = 'Menyimpan...';
+                submitText.textContent = 'Memproses...';
+                outputContainer.classList.add('hidden');
                 notification.classList.add('hidden');
-                
-                // 1.5 Generate nama file dan ID dokumen baru
-                const newFileName = generateNewFileName();
-                const newDocumentId = generateNewDocumentId();
-                documentIdInput.value = newDocumentId; // Simpan untuk template
 
-                // Fungsi untuk mereset tombol jika terjadi error
-                const resetButtonOnError = (errorMessage) => {
-                    showNotification(errorMessage, true);
-                    submitBtn.disabled = false;
-                    submitIcon.classList.remove('hidden');
-                    loadingSpinner.classList.add('hidden');
-                    submitText.textContent = 'Simpan ke GitHub & Buat QR Code';
-                };
-
-                // 2. Kumpulkan semua data dari formulir
+                // 2. KUMPULKAN SEMUA DATA DARI FORM
                 const formData = new FormData(form);
                 const signerName = formData.get('signerName') === 'other' ? formData.get('otherSignerName').trim() : formData.get('signerName');
-                
                 const data = {
-                    fileName: newFileName,
-                    documentId: newDocumentId,
                     letterNumber: formData.get('letterNumber').trim(),
                     letterDate: formatDate(formData.get('letterDate')),
                     creationTimestamp: formatDateTime(formData.get('creationTimestamp')),
                     signerName: signerName,
-                    baseUrl: baseUrlInput.value.trim() 
+                    patientName: formData.get('patientName'),
+                    dob: formData.get('dob'),
+                    medicalRecord: formData.get('medicalRecord'),
+                    registrationNumber: formData.get('registrationNumber'),
+                    medicationInfo: formData.get('medicationInfo'),
+                    diagnosis: formData.get('diagnosis'),
+                    restStartDate: formData.get('restStartDate'),
+                    restEndDate: formData.get('restEndDate'),
+                    restDuration: formData.get('restDuration'),
+                    fileName: generateNewFileName(),
+                    documentId: generateNewDocumentId(),
+                    baseUrl: "https://generator-surat-ijin.vercel.app/" // Ganti jika perlu
                 };
-
-                // Validasi input lainnya
-                if (!data.signerName) {
-                    resetButtonOnError('Harap isi nama penanda tangan.');
-                    return;
-                }
-
-                // 3. Hasilkan konten HTML lengkap dari template
-                const generatedHtmlContent = getHtmlTemplate(data);
-
-                // 4. Kirim data ke backend (Vercel Serverless Function)
+                
+                // --- TAHAP 1: BUAT VERIFIKASI & QR CODE ---
                 try {
-                    const response = await fetch('/api/saveToGithub', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            fileName: data.fileName,
-                            content: generatedHtmlContent
-                        }),
-                    });
-
-                    const result = await response.json();
-
-                    if (!response.ok) {
-                        throw new Error(result.message || `Server merespons dengan status ${response.status}`);
-                    }
+                    submitText.textContent = 'Langkah 1: Membuat Halaman Verifikasi...';
+                    const generatedHtmlContent = getHtmlTemplate(data);
                     
-                    // 5. Jika sukses, tampilkan output
+                    // Simulasi penyimpanan ke GitHub. Di aplikasi nyata, ini akan menjadi fetch call.
+                    // await fetch('/api/saveToGithub', { ... });
+                    console.log(`Simulasi: File ${data.fileName} berhasil disimpan.`);
+                    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulasi jeda jaringan
+                    
+                    // Jika sukses, buat QR Code
                     const fullUrl = data.baseUrl + data.fileName;
-                    
-                    qrcodeContainer.innerHTML = ''; // Bersihkan QR code sebelumnya
+                    qrcodeContainer.innerHTML = '';
                     new QRCode(qrcodeContainer, {
                         text: fullUrl,
-                        width: 200,
-                        height: 200,
+                        width: 150,
+                        height: 150,
                         colorDark: "#000000",
                         colorLight: "#ffffff",
                         correctLevel: QRCode.CorrectLevel.H
                     });
 
-                    qrLinkInput.value = fullUrl;
-                    infoText.textContent = `File ${data.fileName} berhasil disimpan ke GitHub!`;
-                    showNotification('Sukses! File berhasil dibuat dan disimpan.', false);
+                    // Tunggu QR code (canvas) dirender di DOM
+                    await new Promise(resolve => setTimeout(resolve, 500)); 
 
-                    initialOutput.classList.add('hidden');
+                    // --- TAHAP 2: GENERATE PDF SECARA OTOMATIS ---
+                    submitText.textContent = 'Langkah 2: Membuat PDF...';
+                    
+                    const qrCanvas = qrcodeContainer.querySelector('canvas');
+                    if (!qrCanvas) throw new Error("Gagal membuat QR code canvas.");
+                    const qrImageDataUrl = qrCanvas.toDataURL('image/png');
+
+                    // Populate data ke template PDF
+                    document.getElementById('pdf-patientName').innerText = data.patientName;
+                    document.getElementById('pdf-dob').innerText = data.dob;
+                    document.getElementById('pdf-medicalRecord').innerText = data.medicalRecord;
+                    document.getElementById('pdf-registrationNumber').innerText = data.registrationNumber;
+                    document.getElementById('pdf-documentNumber').innerText = data.letterNumber;
+                    document.getElementById('pdf-medicationInfo').innerText = data.medicationInfo;
+                    document.getElementById('pdf-diagnosis').innerText = data.diagnosis;
+                    document.getElementById('pdf-restDuration').innerText = data.restDuration;
+                    document.getElementById('pdf-restStartDate').innerText = data.restStartDate;
+                    document.getElementById('pdf-restEndDate').innerText = data.restEndDate;
+                    document.getElementById('pdf-signerName').innerText = data.signerName;
+                    document.getElementById('qr-img').src = qrImageDataUrl;
+
+                    // Buat PDF dari konten HTML
+                    const { jsPDF } = window.jspdf;
+                    const pdfContent = document.getElementById('pdf-content');
+                    pdfContent.style.left = '0'; // Tampilkan sementara untuk di-capture
+
+                    const canvas = await html2canvas(pdfContent, { scale: 2, useCORS: true });
+                    
+                    pdfContent.style.left = '-9999px'; // Sembunyikan kembali
+                    
+                    const imgData = canvas.toDataURL('image/png');
+                    const pdf = new jsPDF({ orientation: 'p', unit: 'px', format: [canvas.width, canvas.height] });
+                    pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+                    
+                    const pdfFileName = `Surat_Keterangan_${data.patientName.replace(/\s+/g, '_')}.pdf`;
+                    pdf.save(pdfFileName);
+
+                    // 3. TAMPILKAN HASIL SUKSES
+                    showNotification('Sukses! Verifikasi dibuat dan PDF telah diunduh.', false);
+                    infoText.textContent = `File verifikasi ${data.fileName} telah dibuat.`;
                     outputContainer.classList.remove('hidden');
                     outputContainer.classList.add('flex');
 
                 } catch (error) {
                     console.error('Error:', error);
-                    showNotification(`Error: ${error.message}`, true);
-                    initialOutput.classList.add('hidden');
+                    showNotification(`Terjadi Kesalahan: ${error.message}`, true);
                     outputContainer.classList.remove('hidden');
                     outputContainer.classList.add('flex');
-                    qrcodeContainer.innerHTML = '<p class="text-red-500">Gagal membuat QR Code.</p>';
-                    qrLinkInput.value = '';
-                    infoText.textContent = '';
                 } finally {
-                    // 6. Kembalikan tombol ke keadaan normal
+                    // 4. KEMBALIKAN TOMBOL KE NORMAL
                     submitBtn.disabled = false;
                     submitIcon.classList.remove('hidden');
                     loadingSpinner.classList.add('hidden');
-                    submitText.textContent = 'Simpan ke GitHub & Buat QR Code';
+                    submitText.textContent = 'Buat Verifikasi & Generate PDF';
                 }
             });
-            
-            // Fungsi untuk mengunduh QR Code
-            downloadQrBtn.addEventListener('click', () => {
-                const qrCanvas = qrcodeContainer.querySelector('canvas');
-                const qrImage = qrcodeContainer.querySelector('img');
-                const fileName = qrLinkInput.value.split('/').pop().replace('.html', ''); // Ambil nama file dari URL
-                let canvasToProcess;
-
-                if (qrCanvas) {
-                    canvasToProcess = qrCanvas;
-                } else if (qrImage) {
-                    const tempCanvas = document.createElement('canvas');
-                    tempCanvas.width = qrImage.width;
-                    tempCanvas.height = qrImage.height;
-                    const ctx = tempCanvas.getContext('2d');
-                    ctx.drawImage(qrImage, 0, 0);
-                    canvasToProcess = tempCanvas;
-                }
-
-                if (canvasToProcess) {
-                    const dataUrl = canvasToProcess.toDataURL('image/png');
-                    const link = document.createElement('a');
-                    link.download = `qrcode-${fileName}.png`;
-                    link.href = dataUrl;
-                    link.click();
-                }
-            });
-            
-            // --- FUNGSI BANTUAN ---
-            function formatDate(dateString) { if (!dateString) return ''; const [year, month, day] = dateString.split('-'); return `${day}-${month}-${year}`; }
-            function formatDateTime(dateTimeString) { if (!dateTimeString) return ''; const date = new Date(dateTimeString); const day = String(date.getDate()).padStart(2, '0'); const month = String(date.getMonth() + 1).padStart(2, '0'); const year = date.getFullYear(); const hours = String(date.getHours()).padStart(2, '0'); const minutes = String(date.getMinutes()).padStart(2, '0'); const seconds = String(date.getSeconds()).padStart(2, '0'); return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`; }
-            
-            // --- Inisialisasi halaman ---
-            setCurrentDateTime();
         });
     </script>
 
 </body>
 </html>
-
