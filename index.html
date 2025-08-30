@@ -2,10 +2,9 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=1200">
     <title>Generator Surat Izin & PDF Terpadu</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Library untuk QR Code, PDF, dan HTML-to-Canvas -->
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -17,7 +16,6 @@
         .spinner { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         #pdf-content { position: absolute; left: -9999px; font-family: 'Times New Roman', Times, serif; }
-        /* Style untuk menampilkan data yang digenerate */
         .generated-field {
             background-color: #f3f4f6; /* bg-gray-100 */
             border: 1px solid #d1d5db; /* border-gray-300 */
@@ -34,16 +32,39 @@
 </head>
 <body class="bg-gray-100">
 
-    <div class="container mx-auto p-4 sm:p-6 md:p-8 max-w-4xl">
+    <div id="login-container" class="min-h-screen flex items-center justify-center p-4">
+        <div class="max-w-md w-full bg-white p-8 rounded-xl shadow-lg">
+            <img src="https://profaskes.id/images/logo.webp" alt="Logo Profaskes" class="h-12 mx-auto mb-6" onerror="this.onerror=null;this.src='https://placehold.co/200x50/eeeeee/333333?text=Logo';">
+            <h2 class="text-2xl font-bold text-center text-gray-800">Login</h2>
+            <p class="text-center text-gray-500 mb-6">Silakan masuk untuk melanjutkan</p>
+            <form id="login-form" class="space-y-6">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                    <input type="text" id="username" name="username" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                </div>
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="password" name="password" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                </div>
+                 <div id="login-error" class="text-red-500 text-sm text-center hidden">Username atau password salah.</div>
+                <div>
+                    <button type="submit" class="w-full flex justify-center bg-indigo-600 text-white font-bold py-3 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Masuk
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div id="app-container" class="hidden container mx-auto p-4 sm:p-6 md:p-8 max-w-4xl">
         <header class="text-center mb-8">
             <img src="https://profaskes.id/images/logo.webp" alt="Logo Profaskes" class="h-12 mx-auto mb-4" onerror="this.onerror=null;this.src='https://placehold.co/200x50/eeeeee/333333?text=Logo';">
-            <h1 class="text-3xl font-bold text-gray-800">Generator Surat Terpadu</h1>
+            <h1 class="text-3xl font-bold text-gray-800">Profaskes Indoneia Sehat</h1>
             <p class="text-gray-600 mt-2">Buat Halaman Verifikasi, QR Code, dan Surat PDF dalam Satu Langkah.</p>
         </header>
 
         <div class="bg-white p-6 rounded-xl shadow-lg">
             <form id="combined-form" class="space-y-6">
-                <!-- Data Utama Surat -->
                 <fieldset class="border-t border-gray-200 pt-6">
                     <legend class="text-xl font-bold text-gray-700 mb-4">Data Utama Surat</legend>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -74,7 +95,6 @@
                     </div>
                 </fieldset>
 
-                <!-- Data Pasien -->
                 <fieldset class="border-t border-gray-200 pt-6">
                     <legend class="text-xl font-bold text-gray-700 mb-4">Data Pasien</legend>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -116,7 +136,6 @@
                     </div>
                 </fieldset>
 
-                <!-- Tombol Submit -->
                 <div class="pt-5">
                     <button type="submit" id="submitBtn" class="w-full flex justify-center items-center space-x-2 bg-indigo-600 text-white font-bold py-3 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300 disabled:bg-indigo-400 disabled:cursor-not-allowed">
                         <svg id="submit-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -129,17 +148,26 @@
             </form>
         </div>
 
-        <!-- Hasil Output -->
         <div id="output-container" class="mt-8 bg-white p-6 rounded-xl shadow-lg flex-col items-center justify-center text-center hidden">
             <div id="notification" class="w-full p-4 text-white text-center rounded-lg mb-4 hidden"></div>
             <h2 class="text-xl font-bold text-gray-700 mb-4">Proses Selesai!</h2>
             <p id="info-text" class="text-gray-600 mb-4"></p>
-            <div id="qrcode-container" class="mb-4 p-2 bg-gray-100 rounded-xl inline-block border"></div>
-            <p class="text-gray-500 mt-2">PDF Surat Keterangan Dokter telah diunduh secara otomatis.</p>
+            
+            <div id="pdf-preview-container" class="mb-4 w-full h-[600px] bg-gray-100 rounded-xl border flex items-center justify-center">
+                <span class="text-gray-500">Memuat pratinjau PDF...</span>
+            </div>
+            
+            <button id="download-pdf-btn" class="mt-4 flex justify-center items-center space-x-2 bg-teal-600 text-white font-bold py-3 px-6 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-colors duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span>Download PDF</span>
+            </button>
+            
+            <p class="text-gray-500 mt-4">PDF juga telah diunduh secara otomatis sebagai cadangan.</p>
         </div>
     </div>
     
-    <!-- Konten PDF Tersembunyi -->
     <div id="pdf-content" class="w-[800px] p-10 bg-white text-black">
          <div class="header flex items-center justify-between mb-4 border-b-4 border-black pb-2">
             <div class="w-1/4"><img id="logo-img" src="logo.png" alt="Klinik Logo" class="h-32 w-auto mr-4"></div>
@@ -190,7 +218,43 @@
             return head + body;
         }
 
+        // --- LOGIN LOGIC ---
         document.addEventListener('DOMContentLoaded', () => {
+            const loginContainer = document.getElementById('login-container');
+            const appContainer = document.getElementById('app-container');
+            const loginForm = document.getElementById('login-form');
+            
+            if (loginForm) {
+                const usernameInput = document.getElementById('username');
+                const passwordInput = document.getElementById('password');
+                const loginError = document.getElementById('login-error');
+
+                const validCredentials = [
+                    { user: 'donitata1717', pass: 'wasalamL050' },
+                    { user: 'yelli', pass: '0509' }
+                ];
+
+                loginForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    loginError.classList.add('hidden');
+                    const username = usernameInput.value.trim();
+                    const password = passwordInput.value.trim();
+
+                    const isValid = validCredentials.some(cred => cred.user === username && cred.pass === password);
+
+                    if (isValid) {
+                        loginContainer.style.display = 'none';
+                        appContainer.classList.remove('hidden');
+                        initializeApp();
+                    } else {
+                        loginError.classList.remove('hidden');
+                    }
+                });
+            }
+        });
+
+        // --- MAIN APP LOGIC (WRAPPED IN A FUNCTION) ---
+        function initializeApp() {
             // --- DATA DIAGNOSA & OBAT ---
             const diagnosisData = [
                 { sakit: 'Benign paroxysmal positional vertigo (BPPV)', obat: 'Meclizine 6 tablet, 2x1 Tablet sesudah makan (25mg)\nFlunarizine 6 tablet, 1x1 Tablet sesudah makan malam (5mg)\nDomperidone 9 tablet, 3x1 Tablet sebelum makan (10mg)' },
@@ -213,13 +277,14 @@
             const loadingSpinner = document.getElementById('loading-spinner');
             const submitText = document.getElementById('submit-text');
             const outputContainer = document.getElementById('output-container');
-            const qrcodeContainer = document.getElementById('qrcode-container');
             const notification = document.getElementById('notification');
             const infoText = document.getElementById('info-text');
             const creationTimestampInput = document.getElementById('creationTimestamp');
             const letterDateDisplay = document.getElementById('letterDateDisplay');
             const letterDateInput = document.getElementById('letterDate');
             const diagnosisSelect = document.getElementById('diagnosis');
+            const pdfPreviewContainer = document.getElementById('pdf-preview-container');
+            const downloadPdfBtn = document.getElementById('download-pdf-btn');
 
             // --- FUNGSI UTILITAS & GENERATOR ---
             const showNotification = (message, isError = false) => {
@@ -241,20 +306,19 @@
             const formatDate = (dateStr) => { if (!dateStr) return ''; const [y, m, d] = dateStr.split('-'); return `${d}-${m}-${y}`; }
             const formatDateTime = (dateTimeStr) => { if (!dateTimeStr) return ''; const d = new Date(dateTimeStr); return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`; }
 
+            // --- VARIABLE TO STORE PDF FOR RE-DOWNLOAD ---
+            let generatedPdf = null;
+            let generatedFileName = '';
+
             // --- INISIALISASI & EVENT LISTENERS ---
             const initializeForm = () => {
-                // Set tanggal & waktu
                 const now = new Date();
                 now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
                 creationTimestampInput.value = now.toISOString().slice(0, 16);
                 updateLetterDate();
-
-                // Generate & tampilkan nomor otomatis
                 document.getElementById('letterNumberDisplay').textContent = generateLetterNumber();
                 document.getElementById('medicalRecordDisplay').textContent = generateMedicalRecordNumber();
                 document.getElementById('registrationNumberDisplay').textContent = generateRegistrationNumber();
-                
-                // Populate dropdown diagnosa
                 diagnosisData.forEach(item => {
                     const option = document.createElement('option');
                     option.value = item.sakit;
@@ -267,7 +331,7 @@
                 const dateValue = creationTimestampInput.value.split('T')[0];
                 const formatted = formatDate(dateValue);
                 letterDateDisplay.textContent = formatted;
-                letterDateInput.value = dateValue; // Simpan format YYYY-MM-DD di hidden input
+                letterDateInput.value = dateValue;
             };
             
             creationTimestampInput.addEventListener('change', updateLetterDate);
@@ -276,6 +340,14 @@
                 const isOther = e.target.value === 'other';
                 otherSignerInput.classList.toggle('hidden', !isOther);
                 otherSignerInput.required = isOther;
+            });
+
+            downloadPdfBtn.addEventListener('click', () => {
+                if (generatedPdf && generatedFileName) {
+                    generatedPdf.save(generatedFileName);
+                } else {
+                    alert('Tidak ada PDF untuk diunduh. Silakan generate terlebih dahulu.');
+                }
             });
 
             // --- LOGIKA UTAMA SAAT SUBMIT ---
@@ -288,7 +360,6 @@
                 outputContainer.classList.add('hidden');
                 notification.classList.add('hidden');
 
-                // Ambil semua data, termasuk yang di-generate
                 const formData = new FormData(form);
                 const signerName = formData.get('signerName') === 'other' ? formData.get('otherSignerName').trim() : formData.get('signerName');
                 const selectedDiagnosis = diagnosisData.find(d => d.sakit === formData.get('diagnosis'));
@@ -318,14 +389,16 @@
 
                     submitText.textContent = 'Langkah 2: Membuat PDF...';
                     const fullUrl = data.baseUrl + data.fileName;
-                    qrcodeContainer.innerHTML = '';
-                    new QRCode(qrcodeContainer, { text: fullUrl, width: 150, height: 150, correctLevel: QRCode.CorrectLevel.H });
-                    await new Promise(resolve => setTimeout(resolve, 500)); 
 
-                    const qrCanvas = qrcodeContainer.querySelector('canvas');
+                    const tempQrDiv = document.createElement('div');
+                    tempQrDiv.style.position = 'absolute'; tempQrDiv.style.left = '-9999px';
+                    document.body.appendChild(tempQrDiv);
+                    new QRCode(tempQrDiv, { text: fullUrl, width: 150, height: 150, correctLevel: QRCode.CorrectLevel.H });
+                    await new Promise(resolve => setTimeout(resolve, 500)); 
+                    const qrCanvas = tempQrDiv.querySelector('canvas');
                     if (!qrCanvas) throw new Error("Gagal membuat QR code canvas.");
+                    document.body.removeChild(tempQrDiv);
                     
-                    // Populate data ke template PDF
                     document.getElementById('pdf-documentNumber').innerText = data.letterNumber;
                     document.getElementById('pdf-patientName').innerText = data.patientName;
                     document.getElementById('pdf-dob').innerText = data.dob;
@@ -350,7 +423,14 @@
                     const imgData = canvas.toDataURL('image/png');
                     const pdf = new jsPDF({ orientation: 'p', unit: 'px', format: [canvas.width, canvas.height] });
                     pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-                    pdf.save(`Surat_Keterangan_${(data.patientName || 'Pasien').replace(/\s+/g, '_')}.pdf`);
+                    
+                    generatedPdf = pdf;
+                    generatedFileName = `Surat_Keterangan_${(data.patientName || 'Pasien').replace(/\s+/g, '_')}.pdf`;
+                    
+                    pdf.save(generatedFileName);
+
+                    const pdfDataUri = pdf.output('datauristring');
+                    pdfPreviewContainer.innerHTML = `<iframe src="${pdfDataUri}" class="w-full h-full" frameborder="0"></iframe>`;
 
                     showNotification('Sukses! Verifikasi disimpan dan PDF telah diunduh.', false);
                     infoText.textContent = `File verifikasi ${data.fileName} telah berhasil disimpan.`;
@@ -365,7 +445,6 @@
                     submitIcon.classList.remove('hidden');
                     loadingSpinner.classList.add('hidden');
                     submitText.textContent = 'Buat Verifikasi & Generate PDF';
-                    // Re-generate nomor untuk input berikutnya
                     document.getElementById('letterNumberDisplay').textContent = generateLetterNumber();
                     document.getElementById('medicalRecordDisplay').textContent = generateMedicalRecordNumber();
                     document.getElementById('registrationNumberDisplay').textContent = generateRegistrationNumber();
@@ -373,7 +452,7 @@
             });
 
             initializeForm();
-        });
+        }
     </script>
 </body>
 </html>
