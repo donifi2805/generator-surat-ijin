@@ -44,27 +44,22 @@
             <div class="bg-white p-6 rounded-xl shadow-lg">
                 <h2 class="text-xl font-bold text-gray-700 mb-6 border-b pb-3">Data Dokumen</h2>
                 <form id="document-form" class="space-y-4">
-                    <!-- Base URL disembunyikan dan diatur ke URL Vercel sesuai permintaan -->
+                    <!-- Base URL disembunyikan, nilainya diambil otomatis oleh JavaScript -->
                     <div class="hidden">
-                        <label for="baseUrl" class="block text-sm font-medium text-gray-700 mb-1">Base URL Publik</label>
-                        <input type="text" id="baseUrl" name="baseUrl" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" value="https://generator-surat-ijin.vercel.app/" required>
+                        <label for="baseUrl">Base URL Publik</label>
+                        <input type="text" id="baseUrl" name="baseUrl" value="https://donifi2805.github.io/generator-surat-ijin/">
                     </div>
-                    <div>
-                        <label for="fileName" class="block text-sm font-medium text-gray-700 mb-1">Nama File HTML (contoh: verif-001)</label>
-                        <div class="flex items-center">
-                            <input type="text" id="fileName" name="fileName" class="w-full px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:ring-teal-500 focus:border-teal-500" placeholder="verif-001" required>
-                            <span class="inline-flex items-center px-3 text-sm text-gray-500 bg-gray-100 border border-l-0 border-gray-300 rounded-r-md h-10">.html</span>
-                        </div>
+                    <!-- Nama File disembunyikan dan dibuat otomatis -->
+                    <div class="hidden">
+                        <label for="fileName">Nama File HTML</label>
+                        <input type="text" id="fileName" name="fileName">
                     </div>
-                    <div>
-                        <label for="documentId" class="block text-sm font-medium text-gray-700 mb-1">ID Dokumen</label>
-                        <div class="flex items-center space-x-2">
-                           <input type="text" id="documentId" name="documentId" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 bg-gray-100" placeholder="Klik tombol untuk generate ID" readonly required>
-                           <button type="button" id="generateIdBtn" class="p-2 bg-gray-200 text-gray-600 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500" title="Buat ID baru">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 110 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></svg>
-                           </button>
-                        </div>
+                    <!-- ID Dokumen disembunyikan dan dibuat otomatis -->
+                    <div class="hidden">
+                        <label for="documentId">ID Dokumen</label>
+                        <input type="text" id="documentId" name="documentId">
                     </div>
+
                      <div>
                         <label for="letterNumber" class="block text-sm font-medium text-gray-700 mb-1">No. Surat</label>
                         <input type="text" id="letterNumber" name="letterNumber" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" placeholder="3122/SKD/08/2025" required>
@@ -243,7 +238,6 @@
             const copyBtn = document.getElementById('copyBtn');
             const downloadQrBtn = document.getElementById('downloadQrBtn');
             const documentIdInput = document.getElementById('documentId');
-            const generateIdBtn = document.getElementById('generateIdBtn');
             const letterDateInput = document.getElementById('letterDate');
             const creationTimestampInput = document.getElementById('creationTimestamp');
             const signerNameSelect = document.getElementById('signerName');
@@ -253,6 +247,7 @@
             const loadingSpinner = document.getElementById('loading-spinner');
             const submitText = document.getElementById('submit-text');
             const notification = document.getElementById('notification');
+            const baseUrlInput = document.getElementById('baseUrl');
 
             // --- FUNGSI UNTUK MENAMPILKAN NOTIFIKASI ---
             const showNotification = (message, isError = false) => {
@@ -261,7 +256,7 @@
                 notification.classList.remove('hidden');
             };
             
-            // --- FUNGSI GENERATE ID BARU ---
+            // --- FUNGSI GENERATE RANDOM ---
             const generateRandomString = (length, characters) => {
                 let result = '';
                 const charactersLength = characters.length;
@@ -271,6 +266,7 @@
                 return result;
             };
 
+            // --- FUNGSI GENERATE ID DOKUMEN BARU ---
             const generateNewDocumentId = () => {
                 const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
                 const alphanumeric = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -280,6 +276,15 @@
                 return `${part1}-${part2}-${part3}`;
             };
             
+            // --- FUNGSI GENERATE NAMA FILE BARU ---
+            const generateNewFileName = () => {
+                const now = new Date();
+                const day = String(now.getDate()).padStart(2, '0');
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const randomPart = generateRandomString(13, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789');
+                return `${day}-${month}-${randomPart}.html`;
+            };
+
             // --- FUNGSI UNTUK MENGATUR WAKTU SAAT INI ---
             const setCurrentDateTime = () => {
                 const now = new Date();
@@ -291,11 +296,6 @@
             };
 
             // --- EVENT LISTENERS ---
-
-            // Generate ID baru saat tombol di klik
-            generateIdBtn.addEventListener('click', () => {
-                documentIdInput.value = generateNewDocumentId();
-            });
 
             // Tampilkan input lain jika 'Lainnya...' dipilih
             signerNameSelect.addEventListener('change', () => {
@@ -328,6 +328,11 @@
                 loadingSpinner.classList.remove('hidden');
                 submitText.textContent = 'Menyimpan...';
                 notification.classList.add('hidden');
+                
+                // 1.5 Generate nama file dan ID dokumen baru
+                const newFileName = generateNewFileName();
+                const newDocumentId = generateNewDocumentId();
+                documentIdInput.value = newDocumentId; // Simpan untuk template
 
                 // Fungsi untuk mereset tombol jika terjadi error
                 const resetButtonOnError = (errorMessage) => {
@@ -342,25 +347,14 @@
                 const formData = new FormData(form);
                 const signerName = formData.get('signerName') === 'other' ? formData.get('otherSignerName').trim() : formData.get('signerName');
                 
-                // --- VALIDASI NAMA FILE ---
-                let rawFileName = formData.get('fileName').trim();
-                if (!rawFileName) {
-                    resetButtonOnError('Nama file tidak boleh kosong.');
-                    return;
-                }
-                // Otomatis tambahkan .html jika belum ada
-                if (!rawFileName.toLowerCase().endsWith('.html')) {
-                    rawFileName += '.html';
-                }
-
                 const data = {
-                    fileName: rawFileName,
-                    documentId: formData.get('documentId').trim(),
+                    fileName: newFileName,
+                    documentId: newDocumentId,
                     letterNumber: formData.get('letterNumber').trim(),
                     letterDate: formatDate(formData.get('letterDate')),
                     creationTimestamp: formatDateTime(formData.get('creationTimestamp')),
                     signerName: signerName,
-                    baseUrl: formData.get('baseUrl').trim() // Mengambil baseUrl dari input yang tersembunyi
+                    baseUrl: baseUrlInput.value.trim() 
                 };
 
                 // Validasi input lainnya
@@ -388,7 +382,6 @@
                     const result = await response.json();
 
                     if (!response.ok) {
-                        // Jika server mengembalikan error, tampilkan pesannya
                         throw new Error(result.message || `Server merespons dengan status ${response.status}`);
                     }
                     
@@ -435,6 +428,7 @@
             downloadQrBtn.addEventListener('click', () => {
                 const qrCanvas = qrcodeContainer.querySelector('canvas');
                 const qrImage = qrcodeContainer.querySelector('img');
+                const fileName = qrLinkInput.value.split('/').pop().replace('.html', ''); // Ambil nama file dari URL
                 let canvasToProcess;
 
                 if (qrCanvas) {
@@ -451,7 +445,7 @@
                 if (canvasToProcess) {
                     const dataUrl = canvasToProcess.toDataURL('image/png');
                     const link = document.createElement('a');
-                    link.download = `qrcode-${document.getElementById('fileName').value.replace('.html', '')}.png`;
+                    link.download = `qrcode-${fileName}.png`;
                     link.href = dataUrl;
                     link.click();
                 }
@@ -462,7 +456,6 @@
             function formatDateTime(dateTimeString) { if (!dateTimeString) return ''; const date = new Date(dateTimeString); const day = String(date.getDate()).padStart(2, '0'); const month = String(date.getMonth() + 1).padStart(2, '0'); const year = date.getFullYear(); const hours = String(date.getHours()).padStart(2, '0'); const minutes = String(date.getMinutes()).padStart(2, '0'); const seconds = String(date.getSeconds()).padStart(2, '0'); return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`; }
             
             // --- Inisialisasi halaman ---
-            documentIdInput.value = generateNewDocumentId();
             setCurrentDateTime();
         });
     </script>
