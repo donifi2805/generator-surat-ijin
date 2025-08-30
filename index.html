@@ -17,14 +17,14 @@
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         #pdf-content { position: absolute; left: -9999px; font-family: 'Times New Roman', Times, serif; }
         .generated-field {
-            background-color: #f3f4f6; /* bg-gray-100 */
-            border: 1px solid #d1d5db; /* border-gray-300 */
-            padding: 0.5rem 0.75rem; /* py-2 px-3 */
-            border-radius: 0.375rem; /* rounded-md */
+            background-color: #f3f4f6;
+            border: 1px solid #d1d5db;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
             font-family: monospace;
-            font-size: 0.875rem; /* text-sm */
-            color: #4b5563; /* text-gray-600 */
-            min-height: 42px; /* Samakan tinggi dengan input */
+            font-size: 0.875rem;
+            color: #4b5563;
+            min-height: 42px;
             display: flex;
             align-items: center;
         }
@@ -32,26 +32,27 @@
 </head>
 <body class="bg-gray-100">
 
+    <div id="loading-modal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+        <div class="bg-white p-8 rounded-lg shadow-xl text-center max-w-sm w-full">
+            <svg class="h-12 w-12 spinner mx-auto text-indigo-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            <h3 class="text-lg font-bold text-gray-800 mb-2">Mohon Tunggu...</h3>
+            <p id="loading-status" class="text-gray-600 mb-6">Memulai proses...</p>
+            <button id="cancel-process-btn" class="w-full bg-red-500 text-white font-bold py-2 px-4 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                Batalkan Proses
+            </button>
+        </div>
+    </div>
+
     <div id="login-container" class="min-h-screen flex items-center justify-center p-4">
         <div class="max-w-md w-full bg-white p-8 rounded-xl shadow-lg">
             <img src="https://profaskes.id/images/logo.webp" alt="Logo Profaskes" class="h-12 mx-auto mb-6" onerror="this.onerror=null;this.src='https://placehold.co/200x50/eeeeee/333333?text=Logo';">
             <h2 class="text-2xl font-bold text-center text-gray-800">Login</h2>
             <p class="text-center text-gray-500 mb-6">Silakan masuk untuk melanjutkan</p>
             <form id="login-form" class="space-y-6">
-                <div>
-                    <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
-                    <input type="text" id="username" name="username" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
-                </div>
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-                    <input type="password" id="password" name="password" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
-                </div>
-                 <div id="login-error" class="text-red-500 text-sm text-center hidden">Username atau password salah.</div>
-                <div>
-                    <button type="submit" class="w-full flex justify-center bg-indigo-600 text-white font-bold py-3 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Masuk
-                    </button>
-                </div>
+                <div><label for="username" class="block text-sm font-medium text-gray-700">Username</label><input type="text" id="username" name="username" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required></div>
+                <div><label for="password" class="block text-sm font-medium text-gray-700">Password</label><input type="password" id="password" name="password" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required></div>
+                <div id="login-error" class="text-red-500 text-sm text-center hidden">Username atau password salah.</div>
+                <div><button type="submit" class="w-full flex justify-center bg-indigo-600 text-white font-bold py-3 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Masuk</button></div>
             </form>
         </div>
     </div>
@@ -67,17 +68,7 @@
             <form id="combined-form" class="space-y-6">
                 <fieldset class="border-t border-gray-200 pt-6">
                     <legend class="text-xl font-bold text-gray-700 mb-4">Data Utama Surat</legend>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="letterNumberDisplay" class="block text-sm font-medium text-gray-700 mb-1">No. Surat (Otomatis)</label>
-                            <div id="letterNumberDisplay" class="generated-field">Memuat...</div>
-                            <input type="hidden" id="letterNumber" name="letterNumber">
-                        </div>
-                        <div>
-                            <label for="letterDateDisplay" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Surat (Otomatis)</label>
-                            <div id="letterDateDisplay" class="generated-field">Memuat...</div>
-                             <input type="hidden" id="letterDate" name="letterDate">
-                        </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                         <div>
                             <label for="creationTimestamp" class="block text-sm font-medium text-gray-700 mb-1">Dibuat Pada (Tanggal & Waktu)</label>
                             <input type="datetime-local" id="creationTimestamp" name="creationTimestamp" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" required>
@@ -92,13 +83,23 @@
                             </select>
                             <input type="text" id="otherSignerName" name="otherSignerName" class="hidden w-full px-3 py-2 mt-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" placeholder="Masukkan nama penanda tangan">
                         </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">No. Surat (Otomatis)</label>
+                            <div id="letterNumberDisplay" class="generated-field">Memuat...</div>
+                            <input type="hidden" id="letterNumber" name="letterNumber">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Surat (Otomatis)</label>
+                            <div id="letterDateDisplay" class="generated-field">Memuat...</div>
+                             <input type="hidden" id="letterDate" name="letterDate">
+                        </div>
                     </div>
                 </fieldset>
 
                 <fieldset class="border-t border-gray-200 pt-6">
                     <legend class="text-xl font-bold text-gray-700 mb-4">Data Pasien</legend>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                         <div>
                             <label for="patientName" class="block text-sm font-medium text-gray-700">Nama Pasien</label>
                             <input type="text" id="patientName" name="patientName" placeholder="Contoh: Yanto Purnomo" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" required>
                         </div>
@@ -106,7 +107,15 @@
                             <label for="dob" class="block text-sm font-medium text-gray-700">Tanggal Lahir</label>
                             <input type="text" id="dob" name="dob" placeholder="Contoh: 20 Januari 1995" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" required>
                         </div>
+                        <div>
+                            <label for="restStartDate" class="block text-sm font-medium text-gray-700">Mulai Istirahat</label>
+                            <input type="text" id="restStartDate" name="restStartDate" placeholder="DD-MM-YYYY" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
                          <div>
+                            <label for="restDuration" class="block text-sm font-medium text-gray-700">Lama Istirahat (hari)</label>
+                            <input type="number" id="restDuration" name="restDuration" value="1" min="1" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div>
                             <label class="block text-sm font-medium text-gray-700">Nomor Rekam Medis (Otomatis)</label>
                             <div id="medicalRecordDisplay" class="generated-field">Memuat...</div>
                             <input type="hidden" id="medicalRecord" name="medicalRecord">
@@ -116,32 +125,22 @@
                             <div id="registrationNumberDisplay" class="generated-field">Memuat...</div>
                             <input type="hidden" id="registrationNumber" name="registrationNumber">
                         </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Selesai Istirahat (Otomatis)</label>
+                            <div id="restEndDateDisplay" class="generated-field">...</div>
+                            <input type="hidden" id="restEndDate" name="restEndDate">
+                        </div>
                         <div class="md:col-span-2">
                             <label for="diagnosis" class="block text-sm font-medium text-gray-700">Keterangan Diagnosa</label>
                             <select id="diagnosis" name="diagnosis" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"></select>
                             <input type="hidden" id="medicationInfo" name="medicationInfo">
-                        </div>
-                         <div>
-                            <label for="restStartDate" class="block text-sm font-medium text-gray-700">Mulai Istirahat</label>
-                            <input type="text" id="restStartDate" name="restStartDate" value="31-08-2025" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                        </div>
-                        <div>
-                            <label for="restEndDate" class="block text-sm font-medium text-gray-700">Selesai Istirahat</label>
-                            <input type="text" id="restEndDate" name="restEndDate" value="31-08-2025" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                        </div>
-                         <div>
-                            <label for="restDuration" class="block text-sm font-medium text-gray-700">Lama Istirahat (hari)</label>
-                            <input type="number" id="restDuration" name="restDuration" value="1" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                         </div>
                     </div>
                 </fieldset>
 
                 <div class="pt-5">
                     <button type="submit" id="submitBtn" class="w-full flex justify-center items-center space-x-2 bg-indigo-600 text-white font-bold py-3 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300 disabled:bg-indigo-400 disabled:cursor-not-allowed">
-                        <svg id="submit-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <svg id="loading-spinner" class="h-5 w-5 spinner hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        <svg id="submit-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         <span id="submit-text">Buat Verifikasi & Generate PDF</span>
                     </button>
                 </div>
@@ -152,96 +151,45 @@
             <div id="notification" class="w-full p-4 text-white text-center rounded-lg mb-4 hidden"></div>
             <h2 class="text-xl font-bold text-gray-700 mb-4">Proses Selesai!</h2>
             <p id="info-text" class="text-gray-600 mb-4"></p>
-            
-            <div id="pdf-preview-container" class="mb-4 w-full h-[600px] bg-gray-100 rounded-xl border flex items-center justify-center">
-                <span class="text-gray-500">Memuat pratinjau PDF...</span>
-            </div>
-            
-            <button id="download-pdf-btn" class="mt-4 flex justify-center items-center space-x-2 bg-teal-600 text-white font-bold py-3 px-6 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-colors duration-300">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                <span>Download PDF</span>
-            </button>
-            
+            <div id="pdf-preview-container" class="mb-4 w-full h-[600px] bg-gray-100 rounded-xl border flex items-center justify-center"><span class="text-gray-500">Memuat pratinjau PDF...</span></div>
+            <button id="download-pdf-btn" class="mt-4 flex justify-center items-center space-x-2 bg-teal-600 text-white font-bold py-3 px-6 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-colors duration-300"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg><span>Download PDF</span></button>
             <p class="text-gray-500 mt-4">PDF juga telah diunduh secara otomatis sebagai cadangan.</p>
         </div>
     </div>
     
     <div id="pdf-content" class="w-[800px] p-10 bg-white text-black">
-         <div class="header flex items-center justify-between mb-4 border-b-4 border-black pb-2">
-            <div class="w-1/4"><img id="logo-img" src="logo.png" alt="Klinik Logo" class="h-32 w-auto mr-4"></div>
-            <div class="w-2/4 text-center text-sm">
-                <p class="font-bold text-lg">KLINIK PRATAMA ASRINA</p>
-                <p>Jl. Kol. Sunandar No.33, Rendole Indah,</p>
-                <p>Muktiharjo, Kec. Margorejo, Kabupaten Pati, Jawa</p>
-                <p>Tengah 59163</p>
-                <p>Telp. 085192746483</p>
-            </div>
-            <div class="w-1/4"></div>
-        </div>
-        <div class="text-center my-6">
-            <h2 class="text-xl font-bold underline">SURAT KETERANGAN DOKTER</h2>
-            <p class="text-sm" id="pdf-documentNumber"></p>
-        </div>
+         <div class="header flex items-center justify-between mb-4 border-b-4 border-black pb-2"><div class="w-1/4"><img id="logo-img" src="logo.png" alt="Klinik Logo" class="h-32 w-auto mr-4"></div><div class="w-2/4 text-center text-sm"><p class="font-bold text-lg">KLINIK PRATAMA ASRINA</p><p>Jl. Kol. Sunandar No.33, Rendole Indah,</p><p>Muktiharjo, Kec. Margorejo, Kabupaten Pati, Jawa</p><p>Tengah 59163</p><p>Telp. 085192746483</p></div><div class="w-1/4"></div></div>
+        <div class="text-center my-6"><h2 class="text-xl font-bold underline">SURAT KETERANGAN DOKTER</h2><p class="text-sm" id="pdf-documentNumber"></p></div>
         <p class="mb-4 text-sm">Berdasarkan hasil pemeriksaan dokter dengan informasi pasien di bawah ini:</p>
-        <table class="text-sm w-full mb-4">
-            <tbody>
-                <tr><td class="w-1/4 py-1">Nama</td><td class="w-auto">: <span id="pdf-patientName"></span></td></tr>
-                <tr><td class="py-1">Tanggal lahir</td><td>: <span id="pdf-dob"></span></td></tr>
-                <tr><td class="py-1">Nomor rekam medis</td><td>: <span id="pdf-medicalRecord"></span></td></tr>
-                <tr><td class="py-1">Nomor registrasi</td><td>: <span id="pdf-registrationNumber"></span></td></tr>
-                <tr><td class="align-top py-1">Keterangan Obat</td><td class="align-top">: <span id="pdf-medicationInfo" class="whitespace-pre-line"></span></td></tr>
-                <tr><td class="py-1">Keterangan Diagnosa</td><td>: <span id="pdf-diagnosis"></span></td></tr>
-            </tbody>
-        </table>
+        <table class="text-sm w-full mb-4"><tbody><tr><td class="w-1/4 py-1">Nama</td><td class="w-auto">: <span id="pdf-patientName"></span></td></tr><tr><td class="py-1">Tanggal lahir</td><td>: <span id="pdf-dob"></span></td></tr><tr><td class="py-1">Nomor rekam medis</td><td>: <span id="pdf-medicalRecord"></span></td></tr><tr><td class="py-1">Nomor registrasi</td><td>: <span id="pdf-registrationNumber"></span></td></tr><tr><td class="align-top py-1">Keterangan Obat</td><td class="align-top">: <span id="pdf-medicationInfo" class="whitespace-pre-line"></span></td></tr><tr><td class="py-1">Keterangan Diagnosa</td><td>: <span id="pdf-diagnosis"></span></td></tr></tbody></table>
         <p class="text-sm mb-6">Untuk di berikan istirahat karena sakit selama <span id="pdf-restDuration"></span> hari Terhitung Mulai Dari tanggal <span id="pdf-restStartDate"></span> sampai tanggal <span id="pdf-restEndDate"></span>.</p>
         <p class="text-sm mb-8">Demikian surat keterangan ini di buat dengan sebenarnya Untuk di pergunakan sebagaimana mestinya.</p>
-        <div class="flex justify-end">
-            <div class="text-center text-sm">
-                <p id="pdf-locationDate">Pati, 31-08-2025</p>
-                <p>Dokter Yang Memeriksa</p>
-                <img id="qr-img" src="" alt="QR Code" class="w-24 h-24 mx-auto my-2">
-                <p class="font-bold underline" id="pdf-signerName"></p>
-                <p>SIP.DPM.PTSP/57244.29561/DU/077/059/164/III/2025</p>
-            </div>
-        </div>
-        <div class="mt-12 border-t pt-2">
-            <p class="text-xs italic">Dokumen ini telah di validasi dan di cetak otomatis oleh system serta tidak di gunakan tanda tangan identik</p>
-        </div>
+        <div class="flex justify-end"><div class="text-center text-sm"><p id="pdf-locationDate">Pati, 31-08-2025</p><p>Dokter Yang Memeriksa</p><img id="qr-img" src="" alt="QR Code" class="w-24 h-24 mx-auto my-2"><p class="font-bold underline" id="pdf-signerName"></p><p>SIP.DPM.PTSP/57244.29561/DU/077/059/164/III/2025</p></div></div>
+        <div class="mt-12 border-t pt-2"><p class="text-xs italic">Dokumen ini telah di validasi dan di cetak otomatis oleh system serta tidak di gunakan tanda tangan identik</p></div>
     </div>
 
     <script>
         const getHtmlTemplate = (data) => {
-            const head = `<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Detail Dokumen Elektronik</title><script src="https://cdn.tailwindcss.com"><\/script><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"><style> body { font-family: 'Inter', sans-serif; min-height: 100vh; } .fade-in { animation: fadeIn 0.5s ease-in-out; } @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } } .fade-out { animation: fadeOut 0.5s ease-in-out forwards; } @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } } .spinner { animation: spin 1s linear infinite; } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } </style></head>`;
-            const body = `<body class="bg-gray-100 flex items-center justify-center"><div id="loading-screen" class="fixed inset-0 bg-gray-100 flex flex-col justify-center items-center z-50 p-4"><img src="https://profaskes.id/images/logo.webp" alt="Logo Profaskes" class="h-16 mb-8" onerror="this.onerror=null;this.src='https://placehold.co/200x64/eeeeee/333333?text=Logo';"><div class="w-full max-w-md bg-white p-6 rounded-lg shadow-md"><h2 class="text-lg font-bold text-center text-gray-700 mb-4">Memverifikasi Dokumen...</h2><ul class="space-y-3"><li id="step1" class="flex items-center text-gray-500 transition-all duration-300"><div class="w-6 h-6 mr-3 flex items-center justify-center"><svg class="spinner animate-spin h-5 w-5 text-teal-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><svg class="checkmark hidden h-6 w-6 text-teal-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg></div><span>Meng-scan data ProFaskes</span></li><li id="step2" class="flex items-center text-gray-500 transition-all duration-300 opacity-50"><div class="w-6 h-6 mr-3 flex items-center justify-center"><svg class="spinner hidden animate-spin h-5 w-5 text-teal-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><svg class="checkmark hidden h-6 w-6 text-teal-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg></div><span>Validasi SIP Tenaga medis KKi</span></li><li id="step3" class="flex items-center text-gray-500 transition-all duration-300 opacity-50"><div class="w-6 h-6 mr-3 flex items-center justify-center"><svg class="spinner hidden animate-spin h-5 w-5 text-teal-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><svg class="checkmark hidden h-6 w-6 text-teal-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg></div><span>Mengecek data klinik pratama asrina</span></li></ul></div></div><div id="main-content" class="hidden w-full p-4 sm:p-6 lg:p-8 flex flex-col items-center"><div class="mb-6"><img src="https://profaskes.id/images/logo.webp" alt="Logo Profaskes" class="h-12 mx-auto" onerror="this.onerror=null;this.src='https://placehold.co/200x50/eeeeee/333333?text=Logo';"></div><div class="w-full max-w-2xl bg-white rounded-xl shadow-lg overflow-hidden"><div id="document-details" class="fade-in"><header class="bg-teal-600 text-white p-4 md:p-6"><div class="flex justify-between items-center"><div class="flex items-center space-x-4"><div><svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg></div><div><h1 class="text-xl md:text-2xl font-bold">Dokumen Terverifikasi</h1><p class="text-sm text-teal-100">Detail Tanda Tangan Elektronik</p></div></div><div><img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhWaiNWrP8YQAZeLoHz4ih_1uY49hKf6fkPiIvO53uVD8Oj4HG99FXMAVXJ8hgug8tfLx7V5JGIopZ6DI_8XCtQNitZT5EipOcXXfMQoSssjefjAb8v3GqZTQeRx-Bq5wQn87N3v5gMPoGIhJJC8ndE8IlqntPfIcw8dlXeBTZYHgKk61poIJAJF3K6ZTc/s1600/unnamed__1_-removebg-preview.png" alt="Logo Verifikasi" class="h-24 w-24 md:h-32 md:w-32" onerror="this.onerror=null;this.src='https://placehold.co/128x128/eeeeee/333333?text=Logo';"></div></div></header><main class="p-6 md:p-8"><div class="space-y-5"><div class="flex flex-col sm:flex-row sm:items-center"><p class="w-full sm:w-1/3 text-gray-500 font-medium mb-1 sm:mb-0">Jenis Dokumen</p><p class="w-full sm:w-2/3 text-gray-800 font-semibold">Surat Keterangan Dokter</p></div><hr><div class="flex flex-col sm:flex-row sm:items-center"><p class="w-full sm:w-1/3 text-gray-500 font-medium mb-1 sm:mb-0">ID Dokumen</p><p class="w-full sm:w-2/3 text-gray-800 font-mono text-sm break-all">${data.documentId}</p></div><hr><div class="flex flex-col sm:flex-row sm:items-center"><p class="w-full sm:w-1/3 text-gray-500 font-medium mb-2 sm:mb-0">No. Surat</p><div class="w-full sm:w-2/3 flex justify-between items-center"><p class="text-gray-800">${data.letterNumber}</p></div></div><hr><div class="flex flex-col sm:flex-row sm:items-center"><p class="w-full sm:w-1/3 text-gray-500 font-medium mb-1 sm:mb-0">Tanggal Surat</p><p class="w-full sm:w-2/3 text-gray-800">${data.letterDate}</p></div><hr><div class="flex flex-col sm:flex-row sm:items-start"><p class="w-full sm:w-1/3 text-gray-500 font-medium mb-1 sm:mb-0">Dibuat Di</p><div class="w-full sm:w-2/3 text-gray-800"><p class="font-semibold">KLINIK PRATAMA ASRINA</p><p class="text-sm text-gray-600">Jl. Kol. Sunandar No.33, Rendole Indah, Muktiharjo, Kec. Margorejo, Kabupaten Pati, Jawa Tengah 59163</p></div></div><hr><div class="flex flex-col sm:flex-row sm:items-center"><p class="w-full sm:w-1/3 text-gray-500 font-medium mb-1 sm:mb-0">Dibuat Pada</p><p class="w-full sm:w-2/3 text-gray-800">${data.creationTimestamp}</p></div></div></main><div class="bg-gray-50 p-6 md:p-8 border-t border-gray-200"><h2 class="text-lg font-bold text-teal-700 mb-4">Informasi Penanda Tangan</h2><div class="space-y-4"><div class="flex flex-col sm:flex-row sm:items-center"><p class="w-full sm:w-1/3 text-gray-500 font-medium mb-1 sm:mb-0">Nama</p><p class="w-full sm:w-2/3 text-gray-800 font-semibold">${data.signerName}</p></div><hr><div class="flex flex-col sm:flex-row sm:items-start"><p class="w-full sm:w-1/3 text-gray-500 font-medium mb-1 sm:mb-0">No. Identitas (SIP)</p><p class="w-full sm:w-2/3 text-gray-800 break-all">SIP.DPMPTSP/957244.29561/DU/077/059/164/III/2025</p></div></div></div><footer class="p-4 bg-gray-100"><div class="flex flex-col sm:flex-row justify-between items-center text-center sm:text-left"><p class="text-xs text-gray-500 mb-2 sm:mb-0">&copy; 2025 Sistem Verifikasi Dokumen.</p><div class="flex items-center space-x-2"><p class="text-xs text-gray-600 font-medium">Terferifikasi Konsil Kesehatan indonesia kki.go.id</p><img src="https://kki.go.id/assets/img/Logo-kki-Full.png" alt="Logo KKI" class="h-8" onerror="this.onerror=null;this.src='https://placehold.co/100x32/eeeeee/333333?text=KKI';"></div></div></footer></div></div></div><script>window.addEventListener('load', () => { const loadingScreen = document.getElementById('loading-screen'); const mainContent = document.getElementById('main-content'); const steps = ['step1', 'step2', 'step3']; function runStep(index) { if (index >= steps.length) { loadingScreen.classList.add('fade-out'); setTimeout(() => { loadingScreen.style.display = 'none'; mainContent.classList.remove('hidden'); mainContent.classList.add('fade-in'); }, 500); return; } const stepElement = document.getElementById(steps[index]); const spinner = stepElement.querySelector('.spinner'); const checkmark = stepElement.querySelector('.checkmark'); stepElement.classList.remove('opacity-50'); if (spinner) spinner.classList.remove('hidden'); const randomDelay = Math.random() * 1000 + 1500; setTimeout(() => { if (spinner) spinner.classList.add('hidden'); if (checkmark) checkmark.classList.remove('hidden'); stepElement.classList.remove('text-gray-500'); stepElement.classList.add('text-teal-600', 'font-semibold'); runStep(index + 1); }, randomDelay); } runStep(0); });<\/script></body></html>`;
+            // ... (Template HTML untuk halaman verifikasi tidak diubah)
+            const head = `<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Detail Dokumen Elektronik</title><script src="https://cdn.tailwindcss.com"><\/script><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"><style> body { font-family: 'Inter', sans-serif; min-height: 100vh; } .fade-in { animation: fadeIn 0.5s ease-in-out; } @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } } .fade-out { animation: fadeOut 0.5s ease-in-out forwards; } @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } } .spinner { animation: spin 1s linear infinite; } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } </style></head>`;const body = `<body class="bg-gray-100 flex items-center justify-center"><div id="loading-screen" class="fixed inset-0 bg-gray-100 flex flex-col justify-center items-center z-50 p-4"><img src="https://profaskes.id/images/logo.webp" alt="Logo Profaskes" class="h-16 mb-8" onerror="this.onerror=null;this.src='https://placehold.co/200x64/eeeeee/333333?text=Logo';"><div class="w-full max-w-md bg-white p-6 rounded-lg shadow-md"><h2 class="text-lg font-bold text-center text-gray-700 mb-4">Memverifikasi Dokumen...</h2><ul class="space-y-3"><li id="step1" class="flex items-center text-gray-500 transition-all duration-300"><div class="w-6 h-6 mr-3 flex items-center justify-center"><svg class="spinner animate-spin h-5 w-5 text-teal-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><svg class="checkmark hidden h-6 w-6 text-teal-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg></div><span>Meng-scan data ProFaskes</span></li><li id="step2" class="flex items-center text-gray-500 transition-all duration-300 opacity-50"><div class="w-6 h-6 mr-3 flex items-center justify-center"><svg class="spinner hidden animate-spin h-5 w-5 text-teal-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><svg class="checkmark hidden h-6 w-6 text-teal-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg></div><span>Validasi SIP Tenaga medis KKi</span></li><li id="step3" class="flex items-center text-gray-500 transition-all duration-300 opacity-50"><div class="w-6 h-6 mr-3 flex items-center justify-center"><svg class="spinner hidden animate-spin h-5 w-5 text-teal-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><svg class="checkmark hidden h-6 w-6 text-teal-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg></div><span>Mengecek data klinik pratama asrina</span></li></ul></div></div><div id="main-content" class="hidden w-full p-4 sm:p-6 lg:p-8 flex flex-col items-center"><div class="mb-6"><img src="https://profaskes.id/images/logo.webp" alt="Logo Profaskes" class="h-12 mx-auto" onerror="this.onerror=null;this.src='https://placehold.co/200x50/eeeeee/333333?text=Logo';"></div><div class="w-full max-w-2xl bg-white rounded-xl shadow-lg overflow-hidden"><div id="document-details" class="fade-in"><header class="bg-teal-600 text-white p-4 md:p-6"><div class="flex justify-between items-center"><div class="flex items-center space-x-4"><div><svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg></div><div><h1 class="text-xl md:text-2xl font-bold">Dokumen Terverifikasi</h1><p class="text-sm text-teal-100">Detail Tanda Tangan Elektronik</p></div></div><div><img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhWaiNWrP8YQAZeLoHz4ih_1uY49hKf6fkPiIvO53uVD8Oj4HG99FXMAVXJ8hgug8tfLx7V5JGIopZ6DI_8XCtQNitZT5EipOcXXfMQoSssjefjAb8v3GqZTQeRx-Bq5wQn87N3v5gMPoGIhJJC8ndE8IlqntPfIcw8dlXeBTZYHgKk61poIJAJF3K6ZTc/s1600/unnamed__1_-removebg-preview.png" alt="Logo Verifikasi" class="h-24 w-24 md:h-32 md:w-32" onerror="this.onerror=null;this.src='https://placehold.co/128x128/eeeeee/333333?text=Logo';"></div></div></header><main class="p-6 md:p-8"><div class="space-y-5"><div class="flex flex-col sm:flex-row sm:items-center"><p class="w-full sm:w-1/3 text-gray-500 font-medium mb-1 sm:mb-0">Jenis Dokumen</p><p class="w-full sm:w-2/3 text-gray-800 font-semibold">Surat Keterangan Dokter</p></div><hr><div class="flex flex-col sm:flex-row sm:items-center"><p class="w-full sm:w-1/3 text-gray-500 font-medium mb-1 sm:mb-0">ID Dokumen</p><p class="w-full sm:w-2/3 text-gray-800 font-mono text-sm break-all">${data.documentId}</p></div><hr><div class="flex flex-col sm:flex-row sm:items-center"><p class="w-full sm:w-1/3 text-gray-500 font-medium mb-2 sm:mb-0">No. Surat</p><div class="w-full sm:w-2/3 flex justify-between items-center"><p class="text-gray-800">${data.letterNumber}</p></div></div><hr><div class="flex flex-col sm:flex-row sm:items-center"><p class="w-full sm:w-1/3 text-gray-500 font-medium mb-1 sm:mb-0">Tanggal Surat</p><p class="w-full sm:w-2/3 text-gray-800">${data.letterDate}</p></div><hr><div class="flex flex-col sm:flex-row sm:items-start"><p class="w-full sm:w-1/3 text-gray-500 font-medium mb-1 sm:mb-0">Dibuat Di</p><div class="w-full sm:w-2/3 text-gray-800"><p class="font-semibold">KLINIK PRATAMA ASRINA</p><p class="text-sm text-gray-600">Jl. Kol. Sunandar No.33, Rendole Indah, Muktiharjo, Kec. Margorejo, Kabupaten Pati, Jawa Tengah 59163</p></div></div><hr><div class="flex flex-col sm:flex-row sm:items-center"><p class="w-full sm:w-1/3 text-gray-500 font-medium mb-1 sm:mb-0">Dibuat Pada</p><p class="w-full sm:w-2/3 text-gray-800">${data.creationTimestamp}</p></div></div></main><div class="bg-gray-50 p-6 md:p-8 border-t border-gray-200"><h2 class="text-lg font-bold text-teal-700 mb-4">Informasi Penanda Tangan</h2><div class="space-y-4"><div class="flex flex-col sm:flex-row sm:items-center"><p class="w-full sm:w-1/3 text-gray-500 font-medium mb-1 sm:mb-0">Nama</p><p class="w-full sm:w-2/3 text-gray-800 font-semibold">${data.signerName}</p></div><hr><div class="flex flex-col sm:flex-row sm:items-start"><p class="w-full sm:w-1/3 text-gray-500 font-medium mb-1 sm:mb-0">No. Identitas (SIP)</p><p class="w-full sm:w-2/3 text-gray-800 break-all">SIP.DPMPTSP/957244.29561/DU/077/059/164/III/2025</p></div></div></div><footer class="p-4 bg-gray-100"><div class="flex flex-col sm:flex-row justify-between items-center text-center sm:text-left"><p class="text-xs text-gray-500 mb-2 sm:mb-0">&copy; 2025 Sistem Verifikasi Dokumen.</p><div class="flex items-center space-x-2"><p class="text-xs text-gray-600 font-medium">Terferifikasi Konsil Kesehatan indonesia kki.go.id</p><img src="https://kki.go.id/assets/img/Logo-kki-Full.png" alt="Logo KKI" class="h-8" onerror="this.onerror=null;this.src='https://placehold.co/100x32/eeeeee/333333?text=KKI';"></div></div></footer></div></div></div><script>window.addEventListener('load', () => { const loadingScreen = document.getElementById('loading-screen'); const mainContent = document.getElementById('main-content'); const steps = ['step1', 'step2', 'step3']; function runStep(index) { if (index >= steps.length) { loadingScreen.classList.add('fade-out'); setTimeout(() => { loadingScreen.style.display = 'none'; mainContent.classList.remove('hidden'); mainContent.classList.add('fade-in'); }, 500); return; } const stepElement = document.getElementById(steps[index]); const spinner = stepElement.querySelector('.spinner'); const checkmark = stepElement.querySelector('.checkmark'); stepElement.classList.remove('opacity-50'); if (spinner) spinner.classList.remove('hidden'); const randomDelay = Math.random() * 1000 + 1500; setTimeout(() => { if (spinner) spinner.classList.add('hidden'); if (checkmark) checkmark.classList.remove('hidden'); stepElement.classList.remove('text-gray-500'); stepElement.classList.add('text-teal-600', 'font-semibold'); runStep(index + 1); }, randomDelay); } runStep(0); });<\/script></body></html>`;
             return head + body;
         }
 
-        // --- LOGIN LOGIC ---
         document.addEventListener('DOMContentLoaded', () => {
             const loginContainer = document.getElementById('login-container');
             const appContainer = document.getElementById('app-container');
             const loginForm = document.getElementById('login-form');
-            
             if (loginForm) {
                 const usernameInput = document.getElementById('username');
                 const passwordInput = document.getElementById('password');
                 const loginError = document.getElementById('login-error');
-
-                const validCredentials = [
-                    { user: 'donitata1717', pass: 'wasalamL050' },
-                    { user: 'yelli', pass: '0509' }
-                ];
-
+                const validCredentials = [{ user: 'donitata1717', pass: 'wasalamL050' }, { user: 'yelli', pass: '0509' }];
                 loginForm.addEventListener('submit', (e) => {
                     e.preventDefault();
                     loginError.classList.add('hidden');
                     const username = usernameInput.value.trim();
                     const password = passwordInput.value.trim();
-
                     const isValid = validCredentials.some(cred => cred.user === username && cred.pass === password);
-
                     if (isValid) {
                         loginContainer.style.display = 'none';
                         appContainer.classList.remove('hidden');
@@ -253,29 +201,10 @@
             }
         });
 
-        // --- MAIN APP LOGIC (WRAPPED IN A FUNCTION) ---
         function initializeApp() {
-            // --- DATA DIAGNOSA & OBAT ---
-            const diagnosisData = [
-                { sakit: 'Benign paroxysmal positional vertigo (BPPV)', obat: 'Meclizine 6 tablet, 2x1 Tablet sesudah makan (25mg)\nFlunarizine 6 tablet, 1x1 Tablet sesudah makan malam (5mg)\nDomperidone 9 tablet, 3x1 Tablet sebelum makan (10mg)' },
-                { sakit: 'Bronkitis Akut', obat: 'Amoxicillin 500 mg, 3x1 tablet (habiskan)\nAmbroxol 30 mg, 3x1 tablet\nParacetamol 500 mg, 3x1 tablet jika demam' },
-                { sakit: 'Dispepsia Fungsional (Maag)', obat: 'Lansoprazole 30 mg, 1x1 tablet pagi\nSukralfat Sirup 500 mg, 3x1 sendok takar sebelum makan\nDomperidone 10 mg, 3x1 tablet sebelum makan' },
-                { sakit: 'Osteoarthritis (Nyeri Sendi Lutut)', obat: 'Natrium Diklofenak 50 mg, 2x1 tablet sesudah makan\nGlucosamine 500 mg, 3x1 tablet\nRanitidine 150 mg, 2x1 tablet (untuk lambung)\nMethylprednisolone 4 mg, 2x1 tablet (jangka pendek)' },
-                { sakit: 'Konjungtivitis Bakterial (Sakit Mata Merah)', obat: 'Ciprofloxacin Tetes Mata, 4x1 tetes mata kanan-kiri\nNatrium Diklofenak Tetes Mata, 3x1 tetes (jika nyeri)\nLoratadine 10 mg, 1x1 tablet (jika gatal)' },
-                { sakit: 'Migrain Akut', obat: 'Sumatriptan 50 mg, 1 tablet saat serangan, dapat diulang setelah 2 jam\nAsam Mefenamat 500 mg, 3x1 tablet jika nyeri\nMetoclopramide 10 mg, 3x1 tablet jika mual' },
-                { sakit: 'Dermatitis Atopik (Eksim)', obat: 'Desoximetasone Krim 0.25%, oles 2x sehari tipis-tipis\nCetirizine 10 mg, 1x1 tablet malam hari\nPetroleum Jelly (Pelembap), oleskan sesering mungkin' },
-                { sakit: 'Infeksi Jamur Vagina (Kandidiasis)', obat: 'Fluconazole 150 mg, dosis tunggal 1 tablet\nClotrimazole Vaginal Tablet, 1x1 tablet dimasukkan ke vagina malam hari selama 7 hari\nCetirizine 10 mg, 1x1 tablet jika sangat gatal' },
-                { sakit: 'Anemia Defisiensi Besi', obat: 'Sulfas Ferrosus, 1x1 tablet\nVitamin C 50 mg, 1x1 tablet (untuk membantu penyerapan zat besi)\nAsam Folat 400 mcg, 1x1 tablet' },
-                { sakit: 'Otitis Media Akut (Infeksi Telinga Tengah)', obat: 'Amoxicillin Sirup, 3x1 sendok takar (sesuai berat badan, habiskan)\nIbuprofen Sirup, 3x1 sendok takar jika nyeri/demam\nPseudoephedrine HCl Tetes Hidung, 3x2 tetes' },
-                { sakit: 'Herpes Zoster (Cacar Ular)', obat: 'Acyclovir 800 mg, 5x1 tablet selama 7 hari\nGabapentin 300 mg, 1x1 tablet malam (untuk nyeri saraf)\nParacetamol 500 mg, 3x1 tablet jika nyeri\nBedak Salisil 2%, taburkan pada lesi yang sudah kering' },
-            ];
-
-            // --- ELEMEN DOM ---
+            const diagnosisData = [{ sakit: 'Benign paroxysmal positional vertigo (BPPV)', obat: 'Meclizine 6 tablet, 2x1 Tablet sesudah makan (25mg)\nFlunarizine 6 tablet, 1x1 Tablet sesudah makan malam (5mg)\nDomperidone 9 tablet, 3x1 Tablet sebelum makan (10mg)' },{ sakit: 'Bronkitis Akut', obat: 'Amoxicillin 500 mg, 3x1 tablet (habiskan)\nAmbroxol 30 mg, 3x1 tablet\nParacetamol 500 mg, 3x1 tablet jika demam' },{ sakit: 'Dispepsia Fungsional (Maag)', obat: 'Lansoprazole 30 mg, 1x1 tablet pagi\nSukralfat Sirup 500 mg, 3x1 sendok takar sebelum makan\nDomperidone 10 mg, 3x1 tablet sebelum makan' },{ sakit: 'Osteoarthritis (Nyeri Sendi Lutut)', obat: 'Natrium Diklofenak 50 mg, 2x1 tablet sesudah makan\nGlucosamine 500 mg, 3x1 tablet\nRanitidine 150 mg, 2x1 tablet (untuk lambung)\nMethylprednisolone 4 mg, 2x1 tablet (jangka pendek)' },{ sakit: 'Konjungtivitis Bakterial (Sakit Mata Merah)', obat: 'Ciprofloxacin Tetes Mata, 4x1 tetes mata kanan-kiri\nNatrium Diklofenak Tetes Mata, 3x1 tetes (jika nyeri)\nLoratadine 10 mg, 1x1 tablet (jika gatal)' },{ sakit: 'Migrain Akut', obat: 'Sumatriptan 50 mg, 1 tablet saat serangan, dapat diulang setelah 2 jam\nAsam Mefenamat 500 mg, 3x1 tablet jika nyeri\nMetoclopramide 10 mg, 3x1 tablet jika mual' },{ sakit: 'Dermatitis Atopik (Eksim)', obat: 'Desoximetasone Krim 0.25%, oles 2x sehari tipis-tipis\nCetirizine 10 mg, 1x1 tablet malam hari\nPetroleum Jelly (Pelembap), oleskan sesering mungkin' },{ sakit: 'Infeksi Jamur Vagina (Kandidiasis)', obat: 'Fluconazole 150 mg, dosis tunggal 1 tablet\nClotrimazole Vaginal Tablet, 1x1 tablet dimasukkan ke vagina malam hari selama 7 hari\nCetirizine 10 mg, 1x1 tablet jika sangat gatal' },{ sakit: 'Anemia Defisiensi Besi', obat: 'Sulfas Ferrosus, 1x1 tablet\nVitamin C 50 mg, 1x1 tablet (untuk membantu penyerapan zat besi)\nAsam Folat 400 mcg, 1x1 tablet' },{ sakit: 'Otitis Media Akut (Infeksi Telinga Tengah)', obat: 'Amoxicillin Sirup, 3x1 sendok takar (sesuai berat badan, habiskan)\nIbuprofen Sirup, 3x1 sendok takar jika nyeri/demam\nPseudoephedrine HCl Tetes Hidung, 3x2 tetes' },{ sakit: 'Herpes Zoster (Cacar Ular)', obat: 'Acyclovir 800 mg, 5x1 tablet selama 7 hari\nGabapentin 300 mg, 1x1 tablet malam (untuk nyeri saraf)\nParacetamol 500 mg, 3x1 tablet jika nyeri\nBedak Salisil 2%, taburkan pada lesi yang sudah kering' }];
             const form = document.getElementById('combined-form');
             const submitBtn = document.getElementById('submitBtn');
-            const submitIcon = document.getElementById('submit-icon');
-            const loadingSpinner = document.getElementById('loading-spinner');
-            const submitText = document.getElementById('submit-text');
             const outputContainer = document.getElementById('output-container');
             const notification = document.getElementById('notification');
             const infoText = document.getElementById('info-text');
@@ -285,138 +214,100 @@
             const diagnosisSelect = document.getElementById('diagnosis');
             const pdfPreviewContainer = document.getElementById('pdf-preview-container');
             const downloadPdfBtn = document.getElementById('download-pdf-btn');
+            const loadingModal = document.getElementById('loading-modal');
+            const loadingStatus = document.getElementById('loading-status');
+            const cancelProcessBtn = document.getElementById('cancel-process-btn');
+            const restStartDateInput = document.getElementById('restStartDate');
+            const restDurationInput = document.getElementById('restDuration');
+            const restEndDateDisplay = document.getElementById('restEndDateDisplay');
+            const restEndDateInput = document.getElementById('restEndDate');
 
-            // --- FUNGSI UTILITAS & GENERATOR ---
-            const showNotification = (message, isError = false) => {
-                notification.textContent = message;
-                notification.className = `w-full p-4 text-white text-center rounded-lg mb-4 ${isError ? 'bg-red-500' : 'bg-green-500'}`;
-                notification.classList.remove('hidden');
-            };
+            let generatedPdf = null, generatedFileName = '', currentPdfUrl = null, processController = null;
+
+            const showNotification = (message, isError = false) => { notification.textContent = message; notification.className = `w-full p-4 text-white text-center rounded-lg mb-4 ${isError ? 'bg-red-500' : 'bg-green-500'}`; notification.classList.remove('hidden'); };
             const generateRandomString = (length, chars) => Array.from({ length }, () => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
-            const generateLetterNumber = () => {
-                const now = new Date();
-                const part1 = Math.floor(10000 + Math.random() * 90000);
-                const part2 = generateRandomString(3, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ');
-                const part3 = String(now.getMonth() + 1).padStart(2, '0');
-                const part4 = now.getFullYear();
-                return `${part1}-${part2}-${part3}-${part4}`;
-            };
+            const generateLetterNumber = () => `${Math.floor(10000+Math.random()*90000)}-${generateRandomString(3,'ABCDEFGHIJKLMNOPQRSTUVWXYZ')}-${String(new Date().getMonth()+1).padStart(2,'0')}-${new Date().getFullYear()}`;
             const generateMedicalRecordNumber = () => generateRandomString(15, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789');
             const generateRegistrationNumber = () => generateRandomString(9, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789');
             const formatDate = (dateStr) => { if (!dateStr) return ''; const [y, m, d] = dateStr.split('-'); return `${d}-${m}-${y}`; }
-            const formatDateTime = (dateTimeStr) => { if (!dateTimeStr) return ''; const d = new Date(dateTimeStr); return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`; }
+            const formatDateTime = (dateTimeStr) => { if (!dateTimeStr) return ''; const d = new Date(dateTimeStr); return `${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${d.getFullYear()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`; }
 
-            // --- VARIABLE TO STORE PDF FOR RE-DOWNLOAD ---
-            let generatedPdf = null;
-            let generatedFileName = '';
+            // MODIFIKASI 1: Fungsi untuk update tanggal selesai istirahat
+            const updateRestEndDate = () => {
+                const startDateStr = restStartDateInput.value;
+                const duration = parseInt(restDurationInput.value, 10);
+                if (!startDateStr || !/^\d{2}-\d{2}-\d{4}$/.test(startDateStr) || isNaN(duration) || duration < 1) {
+                    restEndDateDisplay.textContent = '...';
+                    restEndDateInput.value = '';
+                    return;
+                }
+                const [day, month, year] = startDateStr.split('-').map(Number);
+                const startDate = new Date(year, month - 1, day);
+                startDate.setDate(startDate.getDate() + duration - 1);
+                const endDateStr = `${String(startDate.getDate()).padStart(2,'0')}-${String(startDate.getMonth()+1).padStart(2,'0')}-${startDate.getFullYear()}`;
+                restEndDateDisplay.textContent = endDateStr;
+                restEndDateInput.value = endDateStr;
+            };
 
-            // --- INISIALISASI & EVENT LISTENERS ---
             const initializeForm = () => {
                 const now = new Date();
+                restStartDateInput.value = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${now.getFullYear()}`;
                 now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
                 creationTimestampInput.value = now.toISOString().slice(0, 16);
                 updateLetterDate();
                 document.getElementById('letterNumberDisplay').textContent = generateLetterNumber();
                 document.getElementById('medicalRecordDisplay').textContent = generateMedicalRecordNumber();
                 document.getElementById('registrationNumberDisplay').textContent = generateRegistrationNumber();
-                diagnosisData.forEach(item => {
-                    const option = document.createElement('option');
-                    option.value = item.sakit;
-                    option.textContent = item.sakit;
-                    diagnosisSelect.appendChild(option);
-                });
+                diagnosisData.forEach(item => { const option = document.createElement('option'); option.value = item.sakit; option.textContent = item.sakit; diagnosisSelect.appendChild(option); });
+                updateRestEndDate();
             };
 
-            const updateLetterDate = () => {
-                const dateValue = creationTimestampInput.value.split('T')[0];
-                const formatted = formatDate(dateValue);
-                letterDateDisplay.textContent = formatted;
-                letterDateInput.value = dateValue;
-            };
+            const updateLetterDate = () => { const dateValue = creationTimestampInput.value.split('T')[0]; const formatted = formatDate(dateValue); letterDateDisplay.textContent = formatted; letterDateInput.value = dateValue; };
             
             creationTimestampInput.addEventListener('change', updateLetterDate);
-            document.getElementById('signerName').addEventListener('change', (e) => {
-                const otherSignerInput = document.getElementById('otherSignerName');
-                const isOther = e.target.value === 'other';
-                otherSignerInput.classList.toggle('hidden', !isOther);
-                otherSignerInput.required = isOther;
-            });
+            document.getElementById('signerName').addEventListener('change', (e) => { const other = document.getElementById('otherSignerName'); const isOther = e.target.value === 'other'; other.classList.toggle('hidden', !isOther); other.required = isOther; });
+            restStartDateInput.addEventListener('input', updateRestEndDate);
+            restDurationInput.addEventListener('input', updateRestEndDate);
+            downloadPdfBtn.addEventListener('click', () => { if (generatedPdf && generatedFileName) { generatedPdf.save(generatedFileName); } else { alert('Tidak ada PDF untuk diunduh.'); } });
+            cancelProcessBtn.addEventListener('click', () => { if (processController) { processController.abort(); } });
 
-            downloadPdfBtn.addEventListener('click', () => {
-                if (generatedPdf && generatedFileName) {
-                    generatedPdf.save(generatedFileName);
-                } else {
-                    alert('Tidak ada PDF untuk diunduh. Silakan generate terlebih dahulu.');
-                }
-            });
-
-            // --- LOGIKA UTAMA SAAT SUBMIT ---
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
+                processController = new AbortController();
                 submitBtn.disabled = true;
-                submitIcon.classList.add('hidden');
-                loadingSpinner.classList.remove('hidden');
-                submitText.textContent = 'Memproses...';
                 outputContainer.classList.add('hidden');
                 notification.classList.add('hidden');
+                loadingStatus.textContent = 'Memulai proses...';
+                loadingModal.classList.remove('hidden');
+
+                if (currentPdfUrl) URL.revokeObjectURL(currentPdfUrl);
 
                 const formData = new FormData(form);
                 const signerName = formData.get('signerName') === 'other' ? formData.get('otherSignerName').trim() : formData.get('signerName');
                 const selectedDiagnosis = diagnosisData.find(d => d.sakit === formData.get('diagnosis'));
-
                 const data = Object.fromEntries(formData.entries());
-                data.signerName = signerName;
-                data.letterNumber = document.getElementById('letterNumberDisplay').textContent;
-                data.medicalRecord = document.getElementById('medicalRecordDisplay').textContent;
-                data.registrationNumber = document.getElementById('registrationNumberDisplay').textContent;
-                data.letterDate = formatDate(data.letterDate);
-                data.creationTimestamp = formatDateTime(data.creationTimestamp);
-                data.fileName = `${String(new Date().getDate()).padStart(2, '0')}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${generateRandomString(13, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')}.html`;
-                data.documentId = `${generateRandomString(5, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')}-${generateRandomString(3, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')}-${generateRandomString(11, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')}`;
-                data.baseUrl = "https://husada-profaskes-datakesehatan-94768487ba8vfx3bjnd5.vercel.app/";
-                data.medicationInfo = selectedDiagnosis ? selectedDiagnosis.obat : 'Tidak ada keterangan obat.';
+                Object.assign(data, { signerName, letterNumber: document.getElementById('letterNumberDisplay').textContent, medicalRecord: document.getElementById('medicalRecordDisplay').textContent, registrationNumber: document.getElementById('registrationNumberDisplay').textContent, letterDate: formatDate(data.letterDate), creationTimestamp: formatDateTime(data.creationTimestamp), fileName: `${String(new Date().getDate()).padStart(2, '0')}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${generateRandomString(13, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')}.html`, documentId: `${generateRandomString(5, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')}-${generateRandomString(3, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')}-${generateRandomString(11, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')}`, baseUrl: "https://husada-profaskes-datakesehatan-94768487ba8vfx3bjnd5.vercel.app/", medicationInfo: selectedDiagnosis ? selectedDiagnosis.obat : 'Tidak ada keterangan obat.' });
 
                 try {
-                    submitText.textContent = 'Langkah 1: Menyimpan ke GitHub...';
+                    loadingStatus.textContent = 'Langkah 1: Menyimpan data verifikasi...';
                     const generatedHtmlContent = getHtmlTemplate(data);
-                    
-                    const response = await fetch('/api/saveToGithub', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ fileName: data.fileName, content: generatedHtmlContent }),
-                    });
+                    const response = await fetch('/api/saveToGithub', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fileName: data.fileName, content: generatedHtmlContent }), signal: processController.signal });
                     if (!response.ok) throw new Error((await response.json()).message || `Server Error: ${response.status}`);
 
-                    submitText.textContent = 'Langkah 2: Membuat PDF...';
+                    loadingStatus.textContent = 'Langkah 2: Membuat PDF...';
                     const fullUrl = data.baseUrl + data.fileName;
-
-                    const tempQrDiv = document.createElement('div');
-                    tempQrDiv.style.position = 'absolute'; tempQrDiv.style.left = '-9999px';
-                    document.body.appendChild(tempQrDiv);
+                    const tempQrDiv = document.createElement('div'); tempQrDiv.style.cssText = 'position:absolute;left:-9999px;'; document.body.appendChild(tempQrDiv);
                     new QRCode(tempQrDiv, { text: fullUrl, width: 150, height: 150, correctLevel: QRCode.CorrectLevel.H });
                     await new Promise(resolve => setTimeout(resolve, 500)); 
                     const qrCanvas = tempQrDiv.querySelector('canvas');
-                    if (!qrCanvas) throw new Error("Gagal membuat QR code canvas.");
+                    if (!qrCanvas) throw new Error("Gagal membuat QR code.");
                     document.body.removeChild(tempQrDiv);
                     
-                    document.getElementById('pdf-documentNumber').innerText = data.letterNumber;
-                    document.getElementById('pdf-patientName').innerText = data.patientName;
-                    document.getElementById('pdf-dob').innerText = data.dob;
-                    document.getElementById('pdf-medicalRecord').innerText = data.medicalRecord;
-                    document.getElementById('pdf-registrationNumber').innerText = data.registrationNumber;
-                    document.getElementById('pdf-diagnosis').innerText = data.diagnosis;
-                    document.getElementById('pdf-medicationInfo').innerText = data.medicationInfo;
-                    document.getElementById('pdf-restDuration').innerText = data.restDuration;
-                    document.getElementById('pdf-restStartDate').innerText = data.restStartDate;
-                    document.getElementById('pdf-restEndDate').innerText = data.restEndDate;
-                    document.getElementById('pdf-signerName').innerText = data.signerName;
-                    document.getElementById('pdf-locationDate').innerText = `Pati, ${data.letterDate}`;
+                    Object.entries({ 'pdf-documentNumber': data.letterNumber, 'pdf-patientName': data.patientName, 'pdf-dob': data.dob, 'pdf-medicalRecord': data.medicalRecord, 'pdf-registrationNumber': data.registrationNumber, 'pdf-diagnosis': data.diagnosis, 'pdf-medicationInfo': data.medicationInfo, 'pdf-restDuration': data.restDuration, 'pdf-restStartDate': data.restStartDate, 'pdf-restEndDate': data.restEndDate, 'pdf-signerName': data.signerName, 'pdf-locationDate': `Pati, ${data.letterDate}` }).forEach(([id, val]) => { document.getElementById(id).innerText = val; });
                     document.getElementById('qr-img').src = qrCanvas.toDataURL('image/png');
 
                     const { jsPDF } = window.jspdf;
-                    const pdfContent = document.getElementById('pdf-content');
-                    pdfContent.style.left = '0';
-
+                    const pdfContent = document.getElementById('pdf-content'); pdfContent.style.left = '0';
                     const canvas = await html2canvas(pdfContent, { scale: 2, useCORS: true });
                     pdfContent.style.left = '-9999px';
                     
@@ -425,26 +316,28 @@
                     pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
                     
                     generatedPdf = pdf;
-                    generatedFileName = `Surat_Keterangan_${(data.patientName || 'Pasien').replace(/\s+/g, '_')}.pdf`;
-                    
+                    generatedFileName = `Surat_Keterangan_${(data.patientName||'Pasien').replace(/\s+/g,'_')}.pdf`;
                     pdf.save(generatedFileName);
 
-                    const pdfDataUri = pdf.output('datauristring');
-                    pdfPreviewContainer.innerHTML = `<iframe src="${pdfDataUri}" class="w-full h-full" frameborder="0"></iframe>`;
+                    // MODIFIKASI 4: Perbaikan Pratinjau PDF
+                    const blob = generatedPdf.output('blob');
+                    currentPdfUrl = URL.createObjectURL(blob);
+                    pdfPreviewContainer.innerHTML = `<iframe src="${currentPdfUrl}" class="w-full h-full" frameborder="0"></iframe>`;
 
                     showNotification('Sukses! Verifikasi disimpan dan PDF telah diunduh.', false);
                     infoText.textContent = `File verifikasi ${data.fileName} telah berhasil disimpan.`;
-                    outputContainer.classList.remove('hidden');
-                    outputContainer.classList.add('flex');
+                    outputContainer.classList.remove('hidden'); outputContainer.classList.add('flex');
 
                 } catch (error) {
-                    console.error('Error:', error);
-                    showNotification(`Terjadi Kesalahan: ${error.message}`, true);
+                    if (error.name === 'AbortError') {
+                        showNotification('Proses dibatalkan oleh pengguna.', true);
+                    } else {
+                        console.error('Error:', error);
+                        showNotification(`Terjadi Kesalahan: ${error.message}`, true);
+                    }
                 } finally {
+                    loadingModal.classList.add('hidden');
                     submitBtn.disabled = false;
-                    submitIcon.classList.remove('hidden');
-                    loadingSpinner.classList.add('hidden');
-                    submitText.textContent = 'Buat Verifikasi & Generate PDF';
                     document.getElementById('letterNumberDisplay').textContent = generateLetterNumber();
                     document.getElementById('medicalRecordDisplay').textContent = generateMedicalRecordNumber();
                     document.getElementById('registrationNumberDisplay').textContent = generateRegistrationNumber();
