@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generator Dokumen Verifikasi</title>
+    <title>Generator & Penyimpanan Dokumen Verifikasi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Library untuk membuat QR Code -->
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
@@ -21,6 +21,13 @@
             border: 4px solid white;
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
         }
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -28,8 +35,8 @@
     <div class="container mx-auto p-4 sm:p-6 md:p-8">
         <header class="text-center mb-8">
             <img src="https://profaskes.id/images/logo.webp" alt="Logo Profaskes" class="h-12 mx-auto mb-4" onerror="this.onerror=null;this.src='https://placehold.co/200x50/eeeeee/333333?text=Logo';">
-            <h1 class="text-3xl font-bold text-gray-800">Generator Dokumen Verifikasi</h1>
-            <p class="text-gray-600 mt-2">Isi formulir di bawah ini untuk membuat halaman verifikasi dan QR code-nya.</p>
+            <h1 class="text-3xl font-bold text-gray-800">Generator & Penyimpanan Dokumen Verifikasi</h1>
+            <p class="text-gray-600 mt-2">Buat halaman verifikasi dan simpan langsung ke GitHub.</p>
         </header>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -38,7 +45,11 @@
                 <h2 class="text-xl font-bold text-gray-700 mb-6 border-b pb-3">Data Dokumen</h2>
                 <form id="document-form" class="space-y-4">
                     <div>
-                        <label for="fileName" class="block text-sm font-medium text-gray-700 mb-1">Nama File HTML (contoh: <span class="font-mono">verif-001.html</span>)</label>
+                        <label for="baseUrl" class="block text-sm font-medium text-gray-700 mb-1">Base URL Publik</label>
+                        <input type="text" id="baseUrl" name="baseUrl" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" value="https://donifi2805.github.io/generator-surat-ijin/" required>
+                    </div>
+                    <div>
+                        <label for="fileName" class="block text-sm font-medium text-gray-700 mb-1">Nama File HTML (contoh: verif-001.html)</label>
                         <input type="text" id="fileName" name="fileName" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" placeholder="verif-001.html" required>
                     </div>
                     <div>
@@ -46,13 +57,11 @@
                         <div class="flex items-center space-x-2">
                            <input type="text" id="documentId" name="documentId" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 bg-gray-100" placeholder="Klik tombol untuk generate ID" readonly required>
                            <button type="button" id="generateIdBtn" class="p-2 bg-gray-200 text-gray-600 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500" title="Buat ID baru">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                  <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 110 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
-                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 110 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></svg>
                            </button>
                         </div>
                     </div>
-                    <div>
+                     <div>
                         <label for="letterNumber" class="block text-sm font-medium text-gray-700 mb-1">No. Surat</label>
                         <input type="text" id="letterNumber" name="letterNumber" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" placeholder="3122/SKD/08/2025" required>
                     </div>
@@ -66,38 +75,48 @@
                     </div>
                     <div>
                         <label for="signerName" class="block text-sm font-medium text-gray-700 mb-1">Nama Penanda Tangan</label>
-                        <input type="text" id="signerName" name="signerName" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" placeholder="Dr. Yulina Saputri" required>
+                        <select id="signerName" name="signerName" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" required>
+                            <option>Dr. Yulina Saputri</option>
+                            <option>Dr. Ahmad Dahlan</option>
+                            <option>Dr. Siti Fatimah</option>
+                            <option value="other">Lainnya...</option>
+                        </select>
+                        <input type="text" id="otherSignerName" name="otherSignerName" class="hidden w-full px-3 py-2 mt-2 border border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500" placeholder="Masukkan nama penanda tangan">
                     </div>
                     
-                    <button type="submit" id="generateBtn" class="w-full bg-teal-600 text-white font-bold py-3 px-4 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-colors duration-300 flex items-center justify-center space-x-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                          <path fill-rule="evenodd" d="M5 4a3 3 0 00-3 3v6a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H5zm-1 9v-1h5v2H5a1 1 0 01-1-1zm7 1h4a1 1 0 001-1v-1h-5v2zm0-4h5V8h-5v2zM4 8h5v2H4V8zm0 3h5v2H4v-2z" clip-rule="evenodd" />
-                        </svg>
-                        <span>Buat Halaman & QR Code</span>
+                    <button type="submit" id="submitBtn" class="w-full bg-teal-600 text-white font-bold py-3 px-4 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-colors duration-300 flex items-center justify-center space-x-2 disabled:bg-teal-400 disabled:cursor-not-allowed">
+                        <svg id="submit-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z" /><path d="M9 13l-3-3m0 0l3-3m-3 3h12" /></svg>
+                        <svg id="loading-spinner" class="h-5 w-5 spinner hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        <span id="submit-text">Simpan ke GitHub & Buat QR Code</span>
                     </button>
                 </form>
             </div>
 
             <!-- Kolom Hasil Output -->
-            <div id="output-container" class="bg-white p-6 rounded-xl shadow-lg flex-col items-center justify-center text-center hidden">
-                <h2 class="text-xl font-bold text-gray-700 mb-4">Hasil Generator</h2>
+            <div id="output-container" class="relative bg-white p-6 rounded-xl shadow-lg flex-col items-center justify-center text-center hidden">
+                 <!-- Notifikasi Sukses/Error -->
+                <div id="notification" class="absolute top-0 left-0 right-0 p-4 text-white text-center rounded-t-xl hidden"></div>
+                
+                <h2 class="text-xl font-bold text-gray-700 mb-4 mt-8">Hasil Generator</h2>
                 <div id="qrcode-container" class="mb-4 p-2 bg-gray-100 rounded-xl">
                     <!-- QR Code akan muncul di sini -->
                 </div>
-                <p id="qr-link" class="text-sm text-gray-600 font-mono break-all mb-4"></p>
-                <p class="text-gray-500 mb-4">File HTML telah diunduh secara otomatis.</p>
+                 <div class="w-full px-4">
+                    <div class="relative">
+                        <input id="qr-link" class="text-sm text-gray-600 font-mono w-full bg-gray-50 border border-gray-200 rounded-md py-2 px-3 pr-10 break-all" readonly>
+                        <button id="copyBtn" class="absolute inset-y-0 right-0 flex items-center pr-3" title="Salin URL">
+                            <svg class="h-5 w-5 text-gray-500 hover:text-gray-700" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM5 11a1 1 0 100 2h4a1 1 0 100-2H5z" /><path fill-rule="evenodd" d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm2-1a1 1 0 00-1 1v10a1 1 0 001 1h12a1 1 0 001-1V5a1 1 0 00-1-1H4z" clip-rule="evenodd" /></svg>
+                        </button>
+                    </div>
+                </div>
+                <p id="info-text" class="text-gray-500 my-4"></p>
                 <button id="downloadQrBtn" class="bg-gray-700 text-white font-bold py-2 px-5 rounded-md hover:bg-gray-800 transition-colors duration-300 flex items-center space-x-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
                     <span>Unduh QR Code (.png)</span>
                 </button>
             </div>
              <div id="initial-output" class="bg-white p-6 rounded-xl shadow-lg flex flex-col items-center justify-center text-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6.364 1.636l-.707.707M20 12h-1M17.636 17.636l-.707-.707M12 20v-1m-6.364-1.636l.707-.707M4 12h1m2.364-5.636l.707.707" />
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 18a6 6 0 100-12 6 6 0 000 12z" />
-                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6.364 1.636l-.707.707M20 12h-1M17.636 17.636l-.707-.707M12 20v-1m-6.364-1.636l.707-.707M4 12h1m2.364-5.636l.707.707" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 18a6 6 0 100-12 6 6 0 000 12z" /></svg>
                 <h2 class="text-xl font-bold text-gray-400">Output Akan Muncul di Sini</h2>
                 <p class="text-gray-500 mt-2">Isi formulir di sebelah kiri dan klik tombol untuk memulai.</p>
             </div>
@@ -115,7 +134,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detail Dokumen Elektronik</title>
     <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAA/1BMVEX////4/v/T6fdntOUAktwAjd4AjeI6oOSQw+7R5vjr9vxQqeEAhdsAlOV6wfCr2Pe03Pmo0vaAuu0AgNwAetYyktrc6/m52/QAmurz+f6pzO4AdNcAi+Z4wvgAc9uz0/KIyfdyreaW0M1Yvbi+3tj/9/PZ5N+YzMRzxcOLztIyjttDoN/P6ekApaP5/Px3xtEAZ8pfn+EAfdTI5ejk8Oml3N2RvOwAadXG5doArXwrspXw9v2v3eoGrpVDgt9Yleiq1e13wOEAo5Jrs9eFud9Km85smOMAgcgAcMRTlNxbmdUAW85+r+qtxO/I1vGetuV9oeAAYMoAT8hlitgATdLMfTOeAAABUklEQVR4AYzPg5oDMQBF4bO2d1OubdQ2U7fv/yybZGr/M+H9Ipa3wgyra+sbG5ubW9s7jNvd2z84PDo+Od06O78QjLBt2o+xOJwbLhtDDt2XDDm9uqbvyH3DiNurHbpWrXV39w+PT88vrw7gzaVr7X0T+Pi8/4Cvr93Xb0D8/GKIvxPA8wV4deVD8QcEmnN/RYdAMBT2wgNKJOBHe39HiXq+VBaLdVcST6Dtn6IkU2pl+lMty+yiJOJof9so2TX0fYBcFiV/ZYV+lNstugpDYXfb0/MIhijahra9KKGIn1uMchHNlUfzu8wap6xEYOf35xpFyCrazpUfrRYIuFyB7vvqMoJRcmE4Glcup8BoNrBEmr9YGgEseWuhVpMJZ9UskYkvk7Vq9P0G4ldSp7WWzNfzslVnwCGrkVYVRbSbMpDfYVgj0JBVZnDIToDZBP8jEQAAns0rz6moqnUAAAAASUVORKCYII=">
-    <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAA/1BMVEX////4/v/T6fdntOUAktwAjd4AjeI6oOSQw+7R5vjr9vxQqeEAhdsAlOV6wfCr2Pe03Pmo0vaAuu0AgNwAetYyktrc6/m52/QAmurz+f6pzO4AdNcAi+Z4wvgAc9uz0/KIyfdyreaW0M11Yvbi+3tj/9/PZ5N+YzMRzxcOLztIyjttDoN/P6ekApaP5/Px3xtEAZ8pfn+EAfdTI5ejk8Oml3N2RvOwAadXG5doArXwrspXw9v2v3eoGrpVDgt9Yleiq1e13wOEAo5Jrs9eFud9Km85smOMAgcgAcMRTlNxbmdUAW85+r+qtxO/I1vGetuV9oeAAYMoAT8hlitgATdLMfTOeAAABUklEQVR4AYzPg5oDMQBF4bO2d1OubdQ2U7fv/yybZGr/M+H9Ipa3wgyra+sbG5ubW9s7jNvd2z84PDo+Od06O78QjLBt2o+xOJwbLhtDDt2XDDm9uqbvyH3DiNurHbpWrXV39w+PT88vrw7gzaVr7X0T+Pi8/4Cvr93Xb0D8/GKIvxPA8wV4deVD8QcEmnN/RYdAMBT2wgNKJOBHe39HiXq+VBaLdVcST6Dtn6IkU2pl+lMty+yiJOJof9so2TX0fYBcFiV/ZYV+lNstugpDYXfb0/MIhijahra9KKGIn1uMchHNlUfzu8wap6xEYOf35xpFyCrazpUfrRYIuFyB7vvqMoJRcmE4Glcup8BoNrBEmr9YGgEseWuhVpMJZ9UskYkvk7Vq9P0G4ldSp7WWzNfzslVnwCGrkVYVRbSbMpDfYVgj0JBVZnDIToDZBP8jEQAAns0rz6moqnUAAAAASUVORKCYII=">
+    <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAA/1BMVEX////4/v/T6fdntOUAktwAjd4AjeI6oOSQw+7R5vjr9vxQqeEAhdsAlOV6wfCr2Pe03Pmo0vaAuu0AgNwAetYyktrc6/m52/QAmurz+f6pzO4AdNcAi+Z4wvgAc9uz0/KIyfdyreaW0M1Yvbi+3tj/9/PZ5N+YzMRzxcOLztIyjttDoN/P6ekApaP5/Px3xtEAZ8pfn+EAfdTI5ejk8Oml3N2RvOwAadXG5doArXwrspXw9v2v3eoGrpVDgt9Yleiq1e13wOEAo5Jrs9eFud9Km85smOMAgcgAcMRTlNxbmdUAW85+r+qtxO/I1vGetuV9oeAAYMoAT8hlitgATdLMfTOeAAABUklEQVR4AYzPg5oDMQBF4bO2d1OubdQ2U7fv/yybZGr/M+H9Ipa3wgyra+sbG5ubW9s7jNvd2z84PDo+Od06O78QjLBt2o+xOJwbLhtDDt2XDDm9uqbvyH3DiNurHbpWrXV39w+PT88vrw7gzaVr7X0T+Pi8/4Cvr93Xb0D8/GKIvxPA8wV4deVD8QcEmnN/RYdAMBT2wgNKJOBHe39HiXq+VBaLdVcST6Dtn6IkU2pl+lMty+yiJOJof9so2TX0fYBcFiV/ZYV+lNstugpDYXfb0/MIhijahra9KKGIn1uMchHNlUfzu8wap6xEYOf35xpFyCrazpUfrRYIuFyB7vvqMoJRcmE4Glcup8BoNrBEmr9YGgEseWuhVpMJZ9UskYkvk7Vq9P0G4ldSp7WWzNfzslVnwCGrkVYVRbSbMpDfYVgj0JBVZnDIToDZBP8jEQAAns0rz6moqnUAAAAASUVORKCYII=">
     <meta name="application-name" content="Profaskes">
     <meta name="apple-mobile-web-app-title" content="Profaskes">
     <script src="https://cdn.tailwindcss.com"><\/script>
@@ -160,11 +179,11 @@
                     </div>
                 </main>
                 <div class="bg-gray-50 p-6 md:p-8 border-t border-gray-200">
-                     <h2 class="text-lg font-bold text-teal-700 mb-4">Informasi Penanda Tangan</h2>
-                     <div class="space-y-4">
-                         <div class="flex flex-col sm:flex-row sm:items-center"><p class="w-full sm:w-1/3 text-gray-500 font-medium mb-1 sm:mb-0">Nama</p><p class="w-full sm:w-2/3 text-gray-800 font-semibold">${data.signerName}</p></div><hr>
-                         <div class="flex flex-col sm:flex-row sm:items-start"><p class="w-full sm:w-1/3 text-gray-500 font-medium mb-1 sm:mb-0">No. Identitas (SIP)</p><p class="w-full sm:w-2/3 text-gray-800 break-all">SIP.DPMPTSP/957244.29561/DU/077/059/164/III/2025</p></div>
-                     </div>
+                       <h2 class="text-lg font-bold text-teal-700 mb-4">Informasi Penanda Tangan</h2>
+                       <div class="space-y-4">
+                           <div class="flex flex-col sm:flex-row sm:items-center"><p class="w-full sm:w-1/3 text-gray-500 font-medium mb-1 sm:mb-0">Nama</p><p class="w-full sm:w-2/3 text-gray-800 font-semibold">${data.signerName}</p></div><hr>
+                           <div class="flex flex-col sm:flex-row sm:items-start"><p class="w-full sm:w-1/3 text-gray-500 font-medium mb-1 sm:mb-0">No. Identitas (SIP)</p><p class="w-full sm:w-2/3 text-gray-800 break-all">SIP.DPMPTSP/957244.29561/DU/077/059/164/III/2025</p></div>
+                       </div>
                 </div>
                 <footer class="p-4 bg-gray-100"><div class="flex flex-col sm:flex-row justify-between items-center text-center sm:text-left"><p class="text-xs text-gray-500 mb-2 sm:mb-0">&copy; 2025 Sistem Verifikasi Dokumen.</p><div class="flex items-center space-x-2"><p class="text-xs text-gray-600 font-medium">Terferifikasi Konsil Kesehatan indonesia kki.go.id</p><img src="https://kki.go.id/assets/img/Logo-kki-Full.png" alt="Logo KKI" class="h-8" onerror="this.onerror=null;this.src='https://placehold.co/100x32/eeeeee/333333?text=KKI';"></div></div></footer>
             </div>
@@ -215,11 +234,29 @@
             const outputContainer = document.getElementById('output-container');
             const initialOutput = document.getElementById('initial-output');
             const qrcodeContainer = document.getElementById('qrcode-container');
-            const qrLink = document.getElementById('qr-link');
+            const qrLinkInput = document.getElementById('qr-link');
+            const infoText = document.getElementById('info-text');
+            const copyBtn = document.getElementById('copyBtn');
             const downloadQrBtn = document.getElementById('downloadQrBtn');
             const documentIdInput = document.getElementById('documentId');
             const generateIdBtn = document.getElementById('generateIdBtn');
+            const letterDateInput = document.getElementById('letterDate');
+            const creationTimestampInput = document.getElementById('creationTimestamp');
+            const signerNameSelect = document.getElementById('signerName');
+            const otherSignerNameInput = document.getElementById('otherSignerName');
+            const submitBtn = document.getElementById('submitBtn');
+            const submitIcon = document.getElementById('submit-icon');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            const submitText = document.getElementById('submit-text');
+            const notification = document.getElementById('notification');
 
+            // --- FUNGSI UNTUK MENAMPILKAN NOTIFIKASI ---
+            const showNotification = (message, isError = false) => {
+                notification.textContent = message;
+                notification.className = `absolute top-0 left-0 right-0 p-4 text-white text-center rounded-t-xl ${isError ? 'bg-red-500' : 'bg-green-500'}`;
+                notification.classList.remove('hidden');
+            };
+            
             // --- FUNGSI GENERATE ID BARU ---
             const generateRandomString = (length, characters) => {
                 let result = '';
@@ -239,77 +276,151 @@
                 return `${part1}-${part2}-${part3}`;
             };
             
+            // --- FUNGSI UNTUK MENGATUR WAKTU SAAT INI ---
+            const setCurrentDateTime = () => {
+                const now = new Date();
+                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                creationTimestampInput.value = now.toISOString().slice(0, 16);
+                
+                const today = new Date().toISOString().split('T')[0];
+                letterDateInput.value = today;
+            };
+
             // --- EVENT LISTENERS ---
 
             // Generate ID baru saat tombol di klik
             generateIdBtn.addEventListener('click', () => {
                 documentIdInput.value = generateNewDocumentId();
             });
-            
-            // Generate ID awal saat halaman dimuat
-            documentIdInput.value = generateNewDocumentId();
 
+            // Tampilkan input lain jika 'Lainnya...' dipilih
+            signerNameSelect.addEventListener('change', () => {
+                if (signerNameSelect.value === 'other') {
+                    otherSignerNameInput.classList.remove('hidden');
+                    otherSignerNameInput.required = true;
+                } else {
+                    otherSignerNameInput.classList.add('hidden');
+                    otherSignerNameInput.required = false;
+                }
+            });
 
-            form.addEventListener('submit', (e) => {
+            // Tombol Salin URL
+            copyBtn.addEventListener('click', () => {
+                qrLinkInput.select();
+                document.execCommand('copy');
+                // Beri feedback visual singkat
+                const originalText = copyBtn.title;
+                copyBtn.title = 'Disalin!';
+                setTimeout(() => { copyBtn.title = originalText; }, 2000);
+            });
+
+            // --- PENGIRIMAN FORMULIR ---
+            form.addEventListener('submit', async (e) => {
                 e.preventDefault();
 
-                // 1. Kumpulkan semua data dari formulir
+                // 1. Tampilkan status loading
+                submitBtn.disabled = true;
+                submitIcon.classList.add('hidden');
+                loadingSpinner.classList.remove('hidden');
+                submitText.textContent = 'Menyimpan...';
+                notification.classList.add('hidden');
+
+                // 2. Kumpulkan semua data dari formulir
                 const formData = new FormData(form);
+                const signerName = formData.get('signerName') === 'other' ? formData.get('otherSignerName').trim() : formData.get('signerName');
+                
                 const data = {
                     fileName: formData.get('fileName').trim(),
                     documentId: formData.get('documentId').trim(),
                     letterNumber: formData.get('letterNumber').trim(),
                     letterDate: formatDate(formData.get('letterDate')),
                     creationTimestamp: formatDateTime(formData.get('creationTimestamp')),
-                    signerName: formData.get('signerName').trim(),
+                    signerName: signerName,
+                    baseUrl: formData.get('baseUrl').trim()
                 };
 
-                // Validasi nama file tidak boleh kosong
-                if (!data.fileName) {
-                    // Mengganti alert dengan notifikasi yang lebih modern
-                    showNotification('Nama File HTML tidak boleh kosong!');
+                // Validasi input
+                if (!data.fileName || !data.signerName) {
+                    showNotification('Harap isi semua kolom yang wajib diisi.', true);
+                    // Reset tombol
+                    submitBtn.disabled = false;
+                    submitIcon.classList.remove('hidden');
+                    loadingSpinner.classList.add('hidden');
+                    submitText.textContent = 'Simpan ke GitHub & Buat QR Code';
                     return;
                 }
 
-                // 2. Hasilkan konten HTML lengkap dari template
-                const generatedHtml = getHtmlTemplate(data);
+                // 3. Hasilkan konten HTML lengkap dari template
+                const generatedHtmlContent = getHtmlTemplate(data);
 
-                // 3. Panggil fungsi untuk mengunduh file HTML
-                downloadFile(generatedHtml, data.fileName, 'text/html');
+                // 4. Kirim data ke backend (Vercel Serverless Function)
+                try {
+                    const response = await fetch('/api/saveToGithub', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            fileName: data.fileName,
+                            content: generatedHtmlContent
+                        }),
+                    });
 
-                // 4. Buat URL untuk QR Code
-                const baseUrl = 'https://usada-profaskes-id-kabfubeubdibgjdb.vercel.app/';
-                const fullUrl = baseUrl + data.fileName;
+                    const result = await response.json();
 
-                // 5. Hasilkan QR Code
-                qrcodeContainer.innerHTML = ''; // Bersihkan QR code sebelumnya
-                new QRCode(qrcodeContainer, {
-                    text: fullUrl,
-                    width: 200,
-                    height: 200,
-                    colorDark: "#000000", // Warna hitam untuk QR Code
-                    colorLight: "#ffffff", // Latar belakang putih untuk diproses nanti
-                    correctLevel: QRCode.CorrectLevel.H
-                });
+                    if (!response.ok) {
+                        // Jika server mengembalikan error, tampilkan pesannya
+                        throw new Error(result.message || `Server merespons dengan status ${response.status}`);
+                    }
+                    
+                    // 5. Jika sukses, tampilkan output
+                    const fullUrl = data.baseUrl + data.fileName;
+                    
+                    qrcodeContainer.innerHTML = ''; // Bersihkan QR code sebelumnya
+                    new QRCode(qrcodeContainer, {
+                        text: fullUrl,
+                        width: 200,
+                        height: 200,
+                        colorDark: "#000000",
+                        colorLight: "#ffffff",
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
 
-                // 6. Tampilkan output
-                qrLink.textContent = fullUrl;
-                initialOutput.classList.add('hidden');
-                outputContainer.classList.remove('hidden');
-                outputContainer.classList.add('flex');
+                    qrLinkInput.value = fullUrl;
+                    infoText.textContent = `File ${data.fileName} berhasil disimpan ke GitHub!`;
+                    showNotification('Sukses! File berhasil dibuat dan disimpan.', false);
+
+                    initialOutput.classList.add('hidden');
+                    outputContainer.classList.remove('hidden');
+                    outputContainer.classList.add('flex');
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    showNotification(`Error: ${error.message}`, true);
+                    initialOutput.classList.add('hidden');
+                    outputContainer.classList.remove('hidden');
+                    outputContainer.classList.add('flex');
+                    qrcodeContainer.innerHTML = '<p class="text-red-500">Gagal membuat QR Code.</p>';
+                    qrLinkInput.value = '';
+                    infoText.textContent = '';
+                } finally {
+                    // 6. Kembalikan tombol ke keadaan normal
+                    submitBtn.disabled = false;
+                    submitIcon.classList.remove('hidden');
+                    loadingSpinner.classList.add('hidden');
+                    submitText.textContent = 'Simpan ke GitHub & Buat QR Code';
+                }
             });
-
-            // Fungsi untuk mengunduh QR Code dengan latar belakang transparan
+            
+            // Fungsi untuk mengunduh QR Code
             downloadQrBtn.addEventListener('click', () => {
                 const qrCanvas = qrcodeContainer.querySelector('canvas');
                 const qrImage = qrcodeContainer.querySelector('img');
-                
                 let canvasToProcess;
 
                 if (qrCanvas) {
                     canvasToProcess = qrCanvas;
                 } else if (qrImage) {
-                    // Jika library membuat <img>, gambar ulang ke canvas baru
                     const tempCanvas = document.createElement('canvas');
                     tempCanvas.width = qrImage.width;
                     tempCanvas.height = qrImage.height;
@@ -319,30 +430,10 @@
                 }
 
                 if (canvasToProcess) {
-                    const ctx = canvasToProcess.getContext('2d');
-                    // Ambil data piksel dari canvas
-                    const imageData = ctx.getImageData(0, 0, canvasToProcess.width, canvasToProcess.height);
-                    const data = imageData.data;
-
-                    // Ulangi setiap piksel (R,G,B,A)
-                    for (let i = 0; i < data.length; i += 4) {
-                        // Cek apakah piksel berwarna putih (R=255, G=255, B=255)
-                        if (data[i] === 255 && data[i + 1] === 255 && data[i + 2] === 255) {
-                            // Ubah alpha channel menjadi 0 (transparan)
-                            data[i + 3] = 0;
-                        }
-                    }
-
-                    // Terapkan kembali data piksel yang sudah dimodifikasi
-                    ctx.putImageData(imageData, 0, 0);
-
-                    // Buat URL data dari canvas yang sudah transparan
-                    const transparentDataUrl = canvasToProcess.toDataURL('image/png');
-                    
-                    // Trigger unduhan
+                    const dataUrl = canvasToProcess.toDataURL('image/png');
                     const link = document.createElement('a');
                     link.download = `qrcode-${document.getElementById('fileName').value.replace('.html', '')}.png`;
-                    link.href = transparentDataUrl;
+                    link.href = dataUrl;
                     link.click();
                 }
             });
@@ -350,18 +441,13 @@
             // --- FUNGSI BANTUAN ---
             function formatDate(dateString) { if (!dateString) return ''; const [year, month, day] = dateString.split('-'); return `${day}-${month}-${year}`; }
             function formatDateTime(dateTimeString) { if (!dateTimeString) return ''; const date = new Date(dateTimeString); const day = String(date.getDate()).padStart(2, '0'); const month = String(date.getMonth() + 1).padStart(2, '0'); const year = date.getFullYear(); const hours = String(date.getHours()).padStart(2, '0'); const minutes = String(date.getMinutes()).padStart(2, '0'); const seconds = String(date.getSeconds()).padStart(2, '0'); return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`; }
-            function downloadFile(content, fileName, contentType) { const a = document.createElement("a"); const file = new Blob([content], { type: contentType }); a.href = URL.createObjectURL(file); a.download = fileName; a.click(); URL.revokeObjectURL(a.href); }
-             function showNotification(message) {
-                const notification = document.createElement('div');
-                notification.className = 'fixed top-5 right-5 bg-red-500 text-white py-2 px-4 rounded-lg shadow-lg animate-bounce';
-                notification.textContent = message;
-                document.body.appendChild(notification);
-                setTimeout(() => {
-                    notification.remove();
-                }, 3000);
-            }
+            
+            // --- Inisialisasi halaman ---
+            documentIdInput.value = generateNewDocumentId();
+            setCurrentDateTime();
         });
     </script>
 
 </body>
 </html>
+
