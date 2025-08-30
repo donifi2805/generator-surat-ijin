@@ -15,7 +15,8 @@
         body { font-family: 'Inter', sans-serif; }
         .spinner { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        #pdf-content { position: absolute; left: -9999px; font-family: 'Times New Roman', Times, serif; }
+        /* MODIFIKASI 2: Mengubah layout menjadi landscape (lebar) */
+        #pdf-content { position: absolute; left: -9999px; font-family: 'Times New Roman', Times, serif; width: 1120px; }
         .generated-field {
             background-color: #f3f4f6;
             border: 1px solid #d1d5db;
@@ -44,7 +45,7 @@
     </div>
 
     <div id="image-lightbox" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4 transition-opacity duration-300">
-        <div class="relative bg-white p-2 rounded-lg shadow-xl max-w-4xl max-h-[90vh] w-auto h-auto">
+        <div class="relative bg-white p-2 rounded-lg shadow-xl max-w-6xl max-h-[90vh] w-auto h-auto">
             <button id="close-lightbox-btn" class="absolute -top-3 -right-3 bg-white rounded-full p-1 text-black z-10 w-8 h-8 flex items-center justify-center text-xl font-bold leading-none hover:bg-gray-200">&times;</button>
             <img id="lightbox-image" src="" class="w-auto h-auto max-w-full max-h-[85vh] object-contain" alt="Pratinjau Ukuran Penuh">
             <div class="absolute bottom-4 left-1/2 -translate-x-1/2">
@@ -122,11 +123,10 @@
                     <span>Download GAMBAR</span>
                 </button>
             </div>
-            <p class="text-gray-500 mt-4">PDF juga telah diunduh secara otomatis sebagai cadangan.</p>
         </div>
     </div>
     
-    <div id="pdf-content" class="w-[800px] p-10 bg-white text-black">
+    <div id="pdf-content" class="w-[1120px] p-10 bg-white text-black">
          <div class="header flex items-center justify-between mb-4 border-b-4 border-black pb-2"><div class="w-1/4"><img id="logo-img" src="logo.png" alt="Klinik Logo" class="h-32 w-auto mr-4"></div><div class="w-2/4 text-center text-sm"><p class="font-bold text-lg">KLINIK PRATAMA ASRINA</p><p>Jl. Kol. Sunandar No.33, Rendole Indah,</p><p>Muktiharjo, Kec. Margorejo, Kabupaten Pati, Jawa</p><p>Tengah 59163</p><p>Telp. 085192746483</p></div><div class="w-1/4"></div></div>
         <div class="text-center my-6"><h2 class="text-xl font-bold underline">SURAT KETERANGAN DOKTER</h2><p class="text-sm" id="pdf-documentNumber"></p></div>
         <p class="mb-4 text-sm">Berdasarkan hasil pemeriksaan dokter dengan informasi pasien di bawah ini:</p>
@@ -283,22 +283,20 @@
                     const canvas = await html2canvas(pdfContent, { scale: 3, useCORS: true });
                     pdfContent.style.left = '-9999px';
                     
-                    // Buat file Gambar (JPG) dari canvas
                     generatedImageUrl = canvas.toDataURL('image/jpeg', 0.9);
-
-                    // Buat file PDF dari canvas
                     const imgDataForPdf = canvas.toDataURL('image/png');
                     const pdf = new jsPDF({ orientation: 'p', unit: 'px', format: [canvas.width, canvas.height] });
                     pdf.addImage(imgDataForPdf, 'PNG', 0, 0, canvas.width, canvas.height);
                     
                     generatedPdf = pdf;
                     generatedFileName = `Surat_Keterangan_${(data.patientName||'Pasien').replace(/\s+/g,'_')}.pdf`;
-                    pdf.save(generatedFileName);
+                    
+                    // MODIFIKASI 1: Menonaktifkan download PDF otomatis
+                    // pdf.save(generatedFileName);
 
-                    // Tampilkan pratinjau gambar
                     previewContainer.innerHTML = `<img src="${generatedImageUrl}" class="max-w-full max-h-[550px] object-contain shadow-md" alt="Pratinjau Surat"/>`;
                     
-                    showNotification('Sukses! Verifikasi disimpan dan file telah diunduh.', false);
+                    showNotification('Sukses! File berhasil dibuat. Silakan unduh file yang Anda inginkan.', false);
                     infoText.textContent = `File verifikasi ${data.fileName} telah berhasil disimpan.`;
                     outputContainer.classList.remove('hidden'); outputContainer.classList.add('flex');
 
