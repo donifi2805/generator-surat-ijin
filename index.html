@@ -16,7 +16,6 @@
         body { font-family: 'Inter', sans-serif; }
         .spinner { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        /* Style untuk memastikan konten PDF tidak terlihat di layar */
         #pdf-content { position: absolute; left: -9999px; font-family: 'Times New Roman', Times, serif; }
     </style>
 </head>
@@ -31,7 +30,7 @@
 
         <div class="bg-white p-6 rounded-xl shadow-lg">
             <form id="combined-form" class="space-y-6">
-                <!-- Bagian Data Dokumen Verifikasi & Surat -->
+                <!-- Data Utama Surat -->
                 <fieldset class="border-t border-gray-200 pt-6">
                     <legend class="text-xl font-bold text-gray-700 mb-4">Data Utama Surat</legend>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -60,7 +59,7 @@
                     </div>
                 </fieldset>
 
-                <!-- Bagian Data Pasien untuk PDF -->
+                <!-- Data Pasien -->
                 <fieldset class="border-t border-gray-200 pt-6">
                     <legend class="text-xl font-bold text-gray-700 mb-4">Data Pasien</legend>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -103,7 +102,7 @@
                     </div>
                 </fieldset>
 
-                <!-- Tombol Submit Utama -->
+                <!-- Tombol Submit -->
                 <div class="pt-5">
                     <button type="submit" id="submitBtn" class="w-full flex justify-center items-center space-x-2 bg-indigo-600 text-white font-bold py-3 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300 disabled:bg-indigo-400 disabled:cursor-not-allowed">
                         <svg id="submit-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -116,21 +115,19 @@
             </form>
         </div>
 
-        <!-- Kolom Hasil Output -->
+        <!-- Hasil Output -->
         <div id="output-container" class="mt-8 bg-white p-6 rounded-xl shadow-lg flex-col items-center justify-center text-center hidden">
             <div id="notification" class="w-full p-4 text-white text-center rounded-lg mb-4 hidden"></div>
             <h2 class="text-xl font-bold text-gray-700 mb-4">Proses Selesai!</h2>
             <p id="info-text" class="text-gray-600 mb-4"></p>
-            <div id="qrcode-container" class="mb-4 p-2 bg-gray-100 rounded-xl inline-block border">
-                <!-- QR Code akan muncul di sini -->
-            </div>
+            <div id="qrcode-container" class="mb-4 p-2 bg-gray-100 rounded-xl inline-block border"></div>
             <p class="text-gray-500 mt-2">PDF Surat Keterangan Dokter telah diunduh secara otomatis.</p>
         </div>
     </div>
     
-    <!-- Konten Tersembunyi untuk Generasi PDF -->
+    <!-- Konten PDF Tersembunyi -->
     <div id="pdf-content" class="w-[800px] p-10 bg-white text-black">
-        <div class="header flex items-center justify-between mb-4 border-b-4 border-black pb-2">
+         <div class="header flex items-center justify-between mb-4 border-b-4 border-black pb-2">
             <div class="w-1/4"><img id="logo-img" src="logo.png" alt="Klinik Logo" class="h-32 w-auto mr-4"></div>
             <div class="w-2/4 text-center text-sm">
                 <p class="font-bold text-lg">KLINIK PRATAMA ASRINA</p>
@@ -172,39 +169,10 @@
         </div>
     </div>
 
-
     <script>
-        // --- TEMPLATE HTML UNTUK HALAMAN VERIFIKASI (YANG DISIMPAN DI GITHUB) ---
         const getHtmlTemplate = (data) => {
-            const head = `
-<!DOCTYPEhtml>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detail Dokumen Elektronik</title>
-    <script src="https://cdn.tailwindcss.com"><\/script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style> body { font-family: 'Inter', sans-serif; } </style>
-</head>
-`;
-            const body = `
-<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
-    <div class="w-full max-w-2xl bg-white rounded-xl shadow-lg overflow-hidden">
-        <header class="bg-teal-600 text-white p-6"><div class="flex items-center space-x-4"><svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg><div><h1 class="text-2xl font-bold">Dokumen Terverifikasi</h1><p class="text-sm text-teal-100">Detail Tanda Tangan Elektronik</p></div></div></header>
-        <main class="p-8 space-y-5">
-            <div><p class="text-sm text-gray-500">ID Dokumen</p><p class="font-mono text-gray-800 break-all">${data.documentId}</p></div><hr>
-            <div><p class="text-sm text-gray-500">No. Surat</p><p class="text-gray-800 font-semibold">${data.letterNumber}</p></div><hr>
-            <div><p class="text-sm text-gray-500">Tanggal Surat</p><p class="text-gray-800">${data.letterDate}</p></div><hr>
-            <div><p class="text-sm text-gray-500">Nama Penanda Tangan</p><p class="text-gray-800 font-semibold">${data.signerName}</p></div><hr>
-            <div><p class="text-sm text-gray-500">Dibuat Pada</p><p class="text-gray-800">${data.creationTimestamp}</p></div>
-        </main>
-        <footer class="p-4 bg-gray-100 text-center"><p class="text-xs text-gray-500">&copy; ${new Date().getFullYear()} Sistem Verifikasi Dokumen.</p></footer>
-    </div>
-</body>
-</html>`;
-            return head + body;
-        }
+            return `<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Detail Dokumen Elektronik</title><script src="https://cdn.tailwindcss.com"><\/script><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"><style>body{font-family:'Inter',sans-serif}</style></head><body class="bg-gray-100 flex items-center justify-center min-h-screen p-4"><div class="w-full max-w-2xl bg-white rounded-xl shadow-lg overflow-hidden"><header class="bg-teal-600 text-white p-6"><div class="flex items-center space-x-4"><svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg><div><h1 class="text-2xl font-bold">Dokumen Terverifikasi</h1><p class="text-sm text-teal-100">Detail Tanda Tangan Elektronik</p></div></div></header><main class="p-8 space-y-5"><div><p class="text-sm text-gray-500">ID Dokumen</p><p class="font-mono text-gray-800 break-all">${data.documentId}</p></div><hr><div><p class="text-sm text-gray-500">No. Surat</p><p class="text-gray-800 font-semibold">${data.letterNumber}</p></div><hr><div><p class="text-sm text-gray-500">Tanggal Surat</p><p class="text-gray-800">${data.letterDate}</p></div><hr><div><p class="text-sm text-gray-500">Nama Penanda Tangan</p><p class="text-gray-800 font-semibold">${data.signerName}</p></div><hr><div><p class="text-sm text-gray-500">Dibuat Pada</p><p class="text-gray-800">${data.creationTimestamp}</p></div></main><footer class="p-4 bg-gray-100 text-center"><p class="text-xs text-gray-500">&copy; ${new Date().getFullYear()} Sistem Verifikasi Dokumen.</p></footer></div></body></html>`;
+        };
 
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('combined-form');
@@ -217,21 +185,18 @@
             const notification = document.getElementById('notification');
             const infoText = document.getElementById('info-text');
 
-            // --- Fungsi untuk menampilkan notifikasi ---
             const showNotification = (message, isError = false) => {
                 notification.textContent = message;
                 notification.className = `w-full p-4 text-white text-center rounded-lg mb-4 ${isError ? 'bg-red-500' : 'bg-green-500'}`;
                 notification.classList.remove('hidden');
             };
 
-            // --- Fungsi utilitas ---
             const generateRandomString = (length, chars) => Array.from({ length }, () => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
             const generateNewDocumentId = () => `${generateRandomString(5, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')}-${generateRandomString(3, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')}-${generateRandomString(11, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')}`;
             const generateNewFileName = () => `${String(new Date().getDate()).padStart(2, '0')}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${generateRandomString(13, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')}.html`;
             const formatDate = (dateStr) => { if (!dateStr) return ''; const [y, m, d] = dateStr.split('-'); return `${d}-${m}-${y}`; }
             const formatDateTime = (dateTimeStr) => { if (!dateTimeStr) return ''; const d = new Date(dateTimeStr); return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`; }
-
-            // --- Atur tanggal dan waktu default ---
+            
             const setCurrentDateTime = () => {
                 const now = new Date();
                 document.getElementById('letterDate').value = now.toISOString().split('T')[0];
@@ -240,20 +205,16 @@
             };
             setCurrentDateTime();
 
-            // --- Tampilkan/Sembunyikan input nama dokter 'Lainnya' ---
             const signerNameSelect = document.getElementById('signerName');
-            const otherSignerNameInput = document.getElementById('otherSignerName');
             signerNameSelect.addEventListener('change', () => {
+                const otherSignerInput = document.getElementById('otherSignerName');
                 const isOther = signerNameSelect.value === 'other';
-                otherSignerNameInput.classList.toggle('hidden', !isOther);
-                otherSignerNameInput.required = isOther;
+                otherSignerInput.classList.toggle('hidden', !isOther);
+                otherSignerInput.required = isOther;
             });
 
-            // --- LOGIKA UTAMA SAAT SUBMIT FORM ---
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                
-                // 1. TAMPILKAN STATUS LOADING
                 submitBtn.disabled = true;
                 submitIcon.classList.add('hidden');
                 loadingSpinner.classList.remove('hidden');
@@ -261,49 +222,42 @@
                 outputContainer.classList.add('hidden');
                 notification.classList.add('hidden');
 
-                // 2. KUMPULKAN SEMUA DATA DARI FORM
                 const formData = new FormData(form);
                 const signerName = formData.get('signerName') === 'other' ? formData.get('otherSignerName').trim() : formData.get('signerName');
-                const data = {
-                    letterNumber: formData.get('letterNumber'),
-                    letterDate: formatDate(formData.get('letterDate')),
-                    creationTimestamp: formatDateTime(formData.get('creationTimestamp')),
-                    signerName: signerName,
-                    patientName: formData.get('patientName'),
-                    dob: formData.get('dob'),
-                    medicalRecord: formData.get('medicalRecord'),
-                    registrationNumber: formData.get('registrationNumber'),
-                    medicationInfo: formData.get('medicationInfo'),
-                    diagnosis: formData.get('diagnosis'),
-                    restStartDate: formData.get('restStartDate'),
-                    restEndDate: formData.get('restEndDate'),
-                    restDuration: formData.get('restDuration'),
-                    fileName: generateNewFileName(),
-                    documentId: generateNewDocumentId(),
-                    baseUrl: "https://generator-surat-ijin.vercel.app/" // Ganti jika perlu
-                };
-                
-                // --- TAHAP 1: BUAT VERIFIKASI & QR CODE ---
+                const data = Object.fromEntries(formData.entries());
+                data.signerName = signerName;
+                data.letterDate = formatDate(data.letterDate);
+                data.creationTimestamp = formatDateTime(data.creationTimestamp);
+                data.fileName = generateNewFileName();
+                data.documentId = generateNewDocumentId();
+                data.baseUrl = "https://generator-surat-ijin.vercel.app/";
+
                 try {
-                    submitText.textContent = 'Langkah 1: Membuat Halaman Verifikasi...';
+                    submitText.textContent = 'Langkah 1: Menyimpan ke GitHub...';
                     const generatedHtmlContent = getHtmlTemplate(data);
                     
-                    // Simulasi penyimpanan ke GitHub. Di aplikasi nyata, ini akan menjadi fetch call.
-                    console.log(`Simulasi: File ${data.fileName} berhasil disimpan.`);
-                    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulasi jeda jaringan
-                    
+                    // *** INI BAGIAN YANG DIPERBAIKI: Mengirim file ke backend/API ***
+                    const response = await fetch('/api/saveToGithub', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            fileName: data.fileName,
+                            content: generatedHtmlContent
+                        }),
+                    });
+
+                    if (!response.ok) {
+                        const errorResult = await response.json();
+                        throw new Error(errorResult.message || `Server Error: ${response.status}`);
+                    }
+                    // *** AKHIR BAGIAN PERBAIKAN ***
+
                     const fullUrl = data.baseUrl + data.fileName;
                     qrcodeContainer.innerHTML = '';
-                    new QRCode(qrcodeContainer, {
-                        text: fullUrl,
-                        width: 150,
-                        height: 150,
-                        correctLevel: QRCode.CorrectLevel.H
-                    });
+                    new QRCode(qrcodeContainer, { text: fullUrl, width: 150, height: 150, correctLevel: QRCode.CorrectLevel.H });
 
                     await new Promise(resolve => setTimeout(resolve, 500)); 
 
-                    // --- TAHAP 2: GENERATE PDF SECARA OTOMATIS ---
                     submitText.textContent = 'Langkah 2: Membuat PDF...';
                     
                     const qrCanvas = qrcodeContainer.querySelector('canvas');
@@ -311,17 +265,11 @@
                     const qrImageDataUrl = qrCanvas.toDataURL('image/png');
 
                     // Populate data ke template PDF
-                    document.getElementById('pdf-patientName').innerText = data.patientName || '';
-                    document.getElementById('pdf-dob').innerText = data.dob || '';
-                    document.getElementById('pdf-medicalRecord').innerText = data.medicalRecord || '';
-                    document.getElementById('pdf-registrationNumber').innerText = data.registrationNumber || '';
+                    for (const key in data) {
+                        const element = document.getElementById(`pdf-${key}`);
+                        if (element) element.innerText = data[key] || '';
+                    }
                     document.getElementById('pdf-documentNumber').innerText = data.letterNumber || '';
-                    document.getElementById('pdf-medicationInfo').innerText = data.medicationInfo || '';
-                    document.getElementById('pdf-diagnosis').innerText = data.diagnosis || '';
-                    document.getElementById('pdf-restDuration').innerText = data.restDuration || '';
-                    document.getElementById('pdf-restStartDate').innerText = data.restStartDate || '';
-                    document.getElementById('pdf-restEndDate').innerText = data.restEndDate || '';
-                    document.getElementById('pdf-signerName').innerText = data.signerName || '';
                     document.getElementById('qr-img').src = qrImageDataUrl;
 
                     const { jsPDF } = window.jspdf;
@@ -336,14 +284,11 @@
                     const pdf = new jsPDF({ orientation: 'p', unit: 'px', format: [canvas.width, canvas.height] });
                     pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
                     
-                    // Perbaikan: Tambahkan fallback jika nama pasien kosong
                     const patientNameForFile = data.patientName || 'Pasien';
-                    const pdfFileName = `Surat_Keterangan_${patientNameForFile.replace(/\s+/g, '_')}.pdf`;
-                    pdf.save(pdfFileName);
+                    pdf.save(`Surat_Keterangan_${patientNameForFile.replace(/\s+/g, '_')}.pdf`);
 
-                    // 3. TAMPILKAN HASIL SUKSES
-                    showNotification('Sukses! Verifikasi dibuat dan PDF telah diunduh.', false);
-                    infoText.textContent = `File verifikasi ${data.fileName} telah dibuat.`;
+                    showNotification('Sukses! Verifikasi disimpan dan PDF telah diunduh.', false);
+                    infoText.textContent = `File verifikasi ${data.fileName} telah berhasil disimpan.`;
                     outputContainer.classList.remove('hidden');
                     outputContainer.classList.add('flex');
 
@@ -353,7 +298,6 @@
                     outputContainer.classList.remove('hidden');
                     outputContainer.classList.add('flex');
                 } finally {
-                    // 4. KEMBALIKAN TOMBOL KE NORMAL
                     submitBtn.disabled = false;
                     submitIcon.classList.remove('hidden');
                     loadingSpinner.classList.add('hidden');
