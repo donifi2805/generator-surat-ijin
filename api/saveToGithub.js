@@ -16,7 +16,7 @@ export default async function handler(request, response) {
 
     // 1. Konfigurasi
     const GITHUB_USERNAME = 'donifi2805';
-    const GITHUB_REPO = 'suratijin';
+    const GITHUB_REPO = 'generator-surat-ijin';
     
     // 2. Ambil token dari Vercel Environment Variables
     const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
